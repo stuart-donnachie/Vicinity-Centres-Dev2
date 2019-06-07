@@ -1,0 +1,858 @@
+<!--
+Date        : 22-08-2016
+Project     : Lease Management System
+Description : Customised opportunity/deals page for lightening experience
+
+Change History 
+--------------       
+--> 
+<apex:page standardcontroller="opportunity" extensions="VC_DealsController,VC_DealsCommon" sidebar="false" 
+showHeader="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" id="thePage" cache="true" standardStylesheets="false">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en" >
+        <head>
+            <meta charset="utf-8" />
+            <meta http-equiv="x-ua-compatible" content="ie=edge" />
+            <title>New Deal</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <apex:stylesheet value="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
+        </head>
+        <body>
+            <style>
+            	.error-list{text-align:left!important;border:1px solid #db9693;border-radius:5px;color:#db9693;padding:1rem;}
+				.error-list li{list-style:disc!important;margin-left:1rem;}
+            	<apex:outputPanel rendered="{!$User.UIThemeDisplayed == 'Theme4t'}" layout="none"> 
+                    .datePicker{
+                    display:none;
+                    }
+                </apex:outputPanel>
+                .slds-form-element__control .lookupInput a.slds-input {
+                width: auto; 
+                border: none;
+                }
+                .slds-input__icon{
+                	cursor: text;
+                }
+                 .lightening-scope .slds-notify-container, .lightening-scope .slds-notify_container
+                {
+                position: relative !important;
+                margin-bottom: 10px;
+                z-index: 500 !important;
+                }
+                .lightening-scope .slds-checkbox .slds-form-element__label {
+                font-size: 12px;
+                padding-top: 15px;
+                }
+                
+                .slds-checkbox {
+                padding-top: 15px;
+                }
+                
+                .slds-form-element__label {
+                padding-top: 15px;
+                }
+                
+                .emptyDependentLookup {
+                width: 100%;
+                height: 30px;
+                }
+                .slds-docked-form-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background: #f4f6f9;
+                box-shadow: 0 -2px 2px 0 rgba(0,0,0,.16);
+                z-index: 8000;
+                display: -ms-flexbox;
+                display: flex;
+                -ms-flex-pack: center;
+                justify-content: center;
+                padding: .5rem 0;
+                }
+                .lightening-scope .slds-theme--error {
+                color: #ffffff;
+                background-color: #e09a97;
+                }
+                #lookup, #lookup2, #lookup3{
+                background: url("{!URLFOR($Resource.icons, 'ic_search_black_24dp_1x.png')}") no-repeat scroll;
+                background-position: right 10px center;
+                background-color: #fff;
+                }
+                .lightening-scope .slds-lookup__menu{
+                z-index: 9000 !important;
+                }
+                .error-input {
+				    background-color: #fff;
+				    border-color: #c23934;
+				    box-shadow: #c23934 0 0 0 1px inset;
+				    background-clip: padding-box;
+				}
+                .convertToLSD td{ padding-top: 10px;}
+                .errorMsg{
+                	color: red;
+                }
+            </style>
+            <!-- 
+            <script type="text/javascript">
+            function triggerAPI() {
+                var oppId = document.getElementById("thePage:mainForm:oppIdHidden1").value;
+                document.getElementById("thePage:mainForm:oppIdHidden2").value = oppId;
+                if(oppId != ""){
+                    setTimeout(DoAPI_JS, 5);
+                }
+            }
+            
+            </script>
+             -->
+            {!debug}
+            <apex:outputpanel rendered="{!objOpp.Id == null}">
+               <center><h1>Unauthorized</h1></center> 
+            </apex:outputpanel>
+            <apex:outputpanel rendered="{!objOpp.Id != null}" layout="none">
+                <apex:form id="mainForm">
+                    <div class="lightening-scope">
+                        <div class="slds-spinner_container slds-hide">
+                            <div class="slds-spinner--brand slds-spinner slds-spinner--medium" aria-hidden="false" role="alert">
+                                <div class="slds-spinner__dot-a"></div>
+                                <div class="slds-spinner__dot-b"></div>
+                            </div>
+                        </div>  
+                        <div class="slds-page-header" role="banner">
+                            <div class="slds-media">
+                                <div class="slds-media__figure" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <svg aria-hidden="true" class="slds-icon slds-icon-standard-opportunity">
+                                        <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/standard-sprite/svg/symbols.svg#opportunity')}"></use>
+                                    </svg>
+                                    <!-- <apex:image styleClass="slds-icon slds-icon-standard-opportunity" value="{!URLFOR($Resource.icons, 'opportunity_60.png')}"/> -->
+                                </div>
+                                <div class="slds-media__body">
+                                    <div style="float: left;">
+                                        <p class="slds-page-header__title slds-truncate" >Deal</p>
+                                        <p class="slds-text-body--small">New Deal</p>
+                                    </div>
+                                    <apex:outputPanel style="float: right;"> 
+                                        <apex:commandButton action="{!createDeal}" rendered="{!objOpp.Unit__r.Is_Active__c == true && objOpp.Unit__r.Is_Building_Active__c}" 
+                                        value="Next" styleclass="slds-button slds-button--brand" onclick="showSpinner()" 
+                                        oncomplete="hideSpinner();setLookUps();setCurrency();;showDateField();" 
+                                        reRender="outgoingsPanel, rec_type,est_comm,act_app,errMsgHeader,oppIdHidden,errMsg2,errMsg3,errMsg4,errMsg5,errMsg5a,errMsg5b,deal_type,existingAccDetails,newAccDetails" />
+                                    </apex:outputPanel> 
+                                </div>
+                            </div>
+                        </div>
+                         <apex:outputPanel id="errMsgHeader" >
+                                            <apex:outputPanel rendered="{!IF(errMsg == true,True,False)}">
+                                                <div class="slds-notify_container">
+                                                    <div class="slds-notify slds-notify--alert slds-theme--error slds-theme--alert-texture" role="alert">
+                                                        <span class="slds-assistive-text">Error</span>
+                                                        <h2><apex:outputText escape="false" rendered="{!IF(errMsg == true,True,False)}" value="{!errString}"></apex:outputText> </h2>
+                                                    </div>
+                                                </div>
+                                            </apex:outputPanel> 
+                                            
+                                            <apex:outputpanel id="messagePanel1" rendered="{!errMsg && (errString == null || errString == '')}">
+                                            <div class="slds-notify_container error-list">
+                                                <apex:messages id="messages1" styleClass="errorM3"/> 
+                                            </div>
+                                        </apex:outputpanel> 
+                                        
+                                        </apex:outputPanel> 
+                        <apex:outputpanel id="mainPanel"> 
+                         <apex:actionRegion >          
+                            <div class="slds-grid slds-grid--align-space">
+                                <div class="slds-col--padded slds-size--1-of-1 slds-medium-size--5-of-6 slds-large-size--8-of-12">
+                                    
+                                   
+                                    <!-- 
+                                    <apex:actionFunction action="{!startRequest}" name="DoAPI_JS" reRender="statuses" status="DoAPI" oncomplete="hideSpinner(); alert('Error occurred during deal creation. Please retry.');"/>
+                                   
+                                      -->
+                                    <apex:outputPanel id="oppIdHidden">
+                                        <apex:inputHidden value="{!oppId}" id="oppIdHidden1"/>
+                                    </apex:outputPanel>
+                                    
+                                    <h3 class="slds-section-title--divider" style="background: none;padding-left: 0;font-weight:bold; font-size: 0.9rem;">Key Information</h3>
+                                    
+                                    <div class="slds-form--stacked">
+                                        <!--
+                                        <div class="slds-form-element">
+                                        <label class="slds-form-element__label">Salesforce Id</label>
+                                        <div class="slds-form-element__control">
+                                        <apex:outputfield value="{!objOpp.Deal_Key__c}"></apex:outputfield>
+                                        </div>
+                                        </div>  -->
+                                         <!-- 
+                                        <div class="slds-form-element">
+                                            <label class="slds-form-element__label">Salesforce ID</label>
+                                            <div class="slds-form-element__control">
+                                                <apex:outputfield value="{!objOpp.Deal_Key__c}"></apex:outputfield>
+                                            </div>
+                                        </div>
+                                        -->
+                                        <div class="slds-form-element">
+                                            <label class="slds-form-element__label">Building</label>
+                                            <div class="slds-form-element__control">
+                                                <apex:outputfield value="{!objOpp.Building__c}"></apex:outputfield>
+                                            </div>
+                                        </div>
+                                        <div class="slds-form-element">
+                                            <label class="slds-form-element__label">Unit</label>
+                                            <div class="slds-form-element__control">
+                                                <apex:outputfield value="{!objOpp.Unit__c}"></apex:outputfield>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="slds-form-element">
+                                            <label class="slds-form-element__label">Area of Premises</label>
+                                            <div class="slds-form-element__control">
+                                                <apex:outputfield value="{!objOpp.Unit__r.Area_of_Premises__c}"></apex:outputfield>
+                                            </div>
+                                        </div>
+                                        <!-- 
+                                        <div class="slds-form-element">
+                                        <label class="slds-form-element__label">Leasing Exec</label>
+                                        <div class="slds-form-element__control">
+                                        <apex:outputfield value="{!objOpp.OwnerId}"></apex:outputfield>
+                                        </div>
+                                        </div>
+                                        -->
+                                        <!-- 
+                                        <div class="slds-form-element">
+                                            
+                                            <div class="slds-form-element__control">
+                                                <apex:inputhidden value="{!objOpp.Leasing_Administrator__c}" id="hiddenleasingadmin"/>
+                                                <div class="slds-lookup" data-select="multi" data-scope="single" data-typeahead="true">
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label">Leasing Administrator</label>
+                                                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                                                            <input id="lookup2" value="" class="slds-input" type="text" aria-autocomplete="list" role="combobox" aria-expanded="false" aria-activedescendant="" />
+                                                        </div>
+                                                        <span id="SelectedRecord2"></span>
+                                                    </div>
+                                                    <div class="slds-lookup__menu" role="listbox" id="results2" style="display:none">
+                                                        <div class="slds-lookup__item">
+                                                            <button class="slds-button" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                                                <svg aria-hidden="true" class="slds-icon slds-icon-text-default slds-icon--small">
+                                                                    <use xlink:href="{!URLFOR ($Resource.SalesforceLighteningDesignSystem, 'assets/icons/utility-sprite/svg/symbols.svg#search')}"></use>
+                                                                </svg>&quot;<span id="keyword2"></span>&quot; in Leasing Administrators</button>
+                                                        </div>
+                                                        <ul class="slds-lookup__list2" role="presentation" id="ui_results2">                                                                                       
+                                                        </ul>                           
+                                                    </div>
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                         -->
+                                         <!-- 
+                                        <div class="slds-form-element">
+                                            
+                                            <div class="slds-form-element__control">
+                                                <apex:inputhidden value="{!objOpp.Select_RLM__c}" id="hiddenmanager"/>
+                                                <div class="slds-lookup" data-select="multi" data-scope="single" data-typeahead="true">
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label">Manager</label>
+                                                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                                                            <input id="lookup3" value="" class="slds-input" type="text" aria-autocomplete="list" role="combobox" aria-expanded="false" aria-activedescendant="" />
+                                                        </div>
+                                                        <span id="SelectedRecord3"></span>
+                                                    </div>
+                                                    <div class="slds-lookup__menu" role="listbox" id="results3" style="display:none">
+                                                        <div class="slds-lookup__item">
+                                                            <button class="slds-button" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                                                <svg aria-hidden="true" class="slds-icon slds-icon-text-default slds-icon--small">
+                                                                    <use xlink:href="{!URLFOR ($Resource.SalesforceLighteningDesignSystem, 'assets/icons/utility-sprite/svg/symbols.svg#search')}"></use>
+                                                                </svg>&quot;<span id="keyword3"></span>&quot; in Managers</button>
+                                                        </div>
+                                                        <ul class="slds-lookup__list3" role="presentation" id="ui_results3">                                                                                       
+                                                        </ul>                           
+                                                    </div>
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                         -->
+                                       
+                                        <apex:outputPanel styleClass="slds-form-element" layout="block" id="deal_type"> 
+                                            <label class="slds-form-element__label"><span class="slds-required" title="required">*</span> Deal Type</label>
+                                            <div class="slds-form-element__control">
+                                                <div class="slds-select_container">
+                                         				<!-- 
+                                                        <apex:selectList value="{!objOpp.Deal_Type__c}" multiselect="false" size="1" styleclass="slds-select {!IF(objOpp.Deal_Type__c == 'None' && errMsg == true,'error-input','')}">
+                                                            <apex:selectOptions value="{!dealTypes}" />
+                                                            <apex:actionSupport onsubmit="showSpinner()" oncomplete="hideSpinner();" event="onchange" action="{!refreshFields}" reRender="newStdPanel,newRenewalPanel,devConfigPanel" /> 
+                                                        </apex:selectList>
+                                                         -->
+                                                         <apex:inputField value="{!objOpp.Deal_Type__c}" styleclass="slds-select {!IF(objOpp.Deal_Type__c == null && errMsg == true,'error-input','')}">
+                                                         	<apex:actionSupport onsubmit="showSpinner()" oncomplete="hideSpinner();" event="onchange" action="{!refreshFields}" reRender="newStdPanel,newRenewalPanel,devConfigPanel" /> 
+                                                         </apex:inputField>
+                                                   
+                                                </div>
+                                            </div>
+                                            <apex:outputPanel id="errMsg1" >
+                                                <apex:outputPanel rendered="{!IF(objOpp.Deal_Type__c == null && errMsg == true,True,False)}">
+                                                    <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                                </apex:outputPanel>
+                                            </apex:outputPanel> 
+                                       </apex:outputPanel>
+                                        
+                                   
+                                    <apex:outputPanel id="newStdPanel">
+                                            <apex:outputPanel id="devunitPnl">    
+	                                            <div class="slds-form-element">
+	                                                <div class="slds-form-element__control">       
+	                                                    <label class="slds-checkbox">
+	                                                        <apex:inputField value="{!objOpp.Dev_Clause__c}">
+	                                                            <apex:actionSupport onsubmit="showSpinner()" oncomplete="hideSpinner();" event="onchange" action="{!refreshFields}" reRender="devConfigPanel" />
+	                                                        </apex:inputfield>
+	                                                        <span class="slds-checkbox--faux"></span>
+	                                                        <span class="slds-form-element__label checkbox__label">Development Clause</span>
+	                                                    </label>
+	                                                </div>
+	                                            </div>
+                                            </apex:outputPanel>
+                                            
+                                            <apex:outputPanel id="devConfigPanel">
+                                                <apex:outputPanel rendered="{!objOpp.Dev_Clause__c}">
+                                                    <article class="slds-card" style="padding: 0px 10px 10px 10px; margin: 10px 0px;">
+                                                        
+                                                        <div class="slds-card__body">
+                                                        	<apex:outputPanel id="unitPnl" rendered="{!objOpp.Deal_Type__c == 'New Tenant Standard' && !objOpp.Reconfig__c}">
+	                                                            <div class="slds-form-element">
+	                                                                <div class="slds-form-element__control">       
+	                                                                    <label class="slds-checkbox">
+	                                                                        <apex:inputfield value="{!objOpp.Development_Unit__c}" styleclass="slds-checkbox">
+	                                                                        <apex:actionSupport onsubmit="showSpinner()" oncomplete="hideSpinner();" event="onchange" action="{!refreshFields}" reRender="dev_only, reconfigPnl" />
+	                                                                        </apex:inputfield>
+	                                                                        <span class="slds-checkbox--faux"></span>
+	                                                                        <span class="slds-form-element__label checkbox__label">Development Unit</span>
+	                                                                    </label>
+	                                                                </div>
+	                                                            </div>
+                                                            </apex:outputPanel>
+                                                            <div class="slds-form-element">
+                                                                <div class="slds-form-element__control">       
+                                                                    <label class="slds-checkbox">
+                                                                        <apex:inputField value="{!objOpp.Dev_Budget__c}"/>
+                                                                        <span class="slds-checkbox--faux"></span>
+                                                                        <span class="slds-form-element__label checkbox__label">Development Budget</span>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </article>
+                                                </apex:outputPanel>
+                                            </apex:outputPanel>
+                                            
+                                            <apex:outputPanel id="reconfigPnl">
+                                                <apex:outputPanel rendered="{!objOpp.Deal_Type__c == 'New Tenant Standard'  && !objOpp.Development_Unit__c}">
+                                                    <div class="slds-form-element">
+                                                        <div class="slds-form-element__control">       
+                                                            <label class="slds-checkbox">
+                                                                <apex:inputfield value="{!objOpp.Reconfig__c}" styleclass="slds-checkboxs">
+                                                                    <apex:actionSupport onsubmit="showSpinner()" oncomplete="hideSpinner();" event="onchange" action="{!refreshFields}" reRender="devConfigPanel"/>
+                                                                </apex:inputfield>
+                                                                <span class="slds-checkbox--faux"></span>
+                                                                <span class="slds-form-element__label checkbox__label">Reconfiguration</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </apex:outputPanel>
+                                            </apex:outputPanel>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel id="newRenewalPanel">
+                                        <apex:outputPanel rendered="{!objOpp.Deal_Type__c == 'Renewal'}">
+                                            <div class="slds-form-element">
+                                                <div class="slds-form-element__control">       
+                                                    <label class="slds-checkbox">
+                                                        <apex:inputField value="{!objOpp.Early_Renewal__c}"/>
+                                                        <span class="slds-checkbox--faux"></span>
+                                                        <span class="slds-form-element__label checkbox__label">Early Renewal</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+
+                                    <apex:outputPanel styleClass="slds-form-element" layout="block" id="rec_type" rendered="{!(objOpp.Unit__r.Unit_Code__c != '40OFF' && objOpp.Unit__r.Unit_Code__c != '45ATM' && objOpp.Unit__r.Unit_Code__c != '55OUT')}"> 
+                                        <label class="slds-form-element__label"><span class="slds-required" title="required">*</span> Recovery Type</label>
+                                        <div class="slds-form-element__control">
+                                        <apex:outputPanel styleClass="slds-select_container" layout="block" rendered="{!(objOpp.Unit__r.Unit_Code__c != '40OFF' && objOpp.Unit__r.Unit_Code__c != '45ATM' && objOpp.Unit__r.Unit_Code__c != '55OUT')}"> 
+                                            <apex:inputfield id="recoveryTypePicklist" rendered="{!(objOpp.Unit__r.Unit_Code__c != '40OFF' && objOpp.Unit__r.Unit_Code__c != '45ATM' && objOpp.Unit__r.Unit_Code__c != '55OUT')}"
+                                            value="{!objOpp.Recovery_Type__c}" styleclass="slds-select {!IF((objOpp.Recovery_Type__c == 'None' || objOpp.Recovery_Type__c == '') && errMsg == true,'error-input','')}">
+                                            	<apex:actionSupport onsubmit="showSpinner()" oncomplete="hideSpinner(); setLookUps();setCurrency();" event="onchange" action="{!refreshFields}" reRender="outgoingsPanel" />
+                                            </apex:inputfield>
+                                        </apex:outputPanel>
+                                        <apex:outputfield rendered="{!(objOpp.Unit__r.Unit_Code__c == '40OFF' || objOpp.Unit__r.Unit_Code__c == '45ATM' || objOpp.Unit__r.Unit_Code__c == '55OUT')}" 
+                                        value="{!objOpp.Recovery_Type__c}" />
+                                        </div>
+                                         <apex:outputPanel id="errMsg1a" >
+                                                <apex:outputPanel rendered="{!IF((objOpp.Recovery_Type__c == 'None' || objOpp.Recovery_Type__c == '') && errMsg == true,True,False)}">
+                                                    <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                                </apex:outputPanel>
+                                        </apex:outputPanel> 
+                                    </apex:outputPanel>
+                                    <apex:outputPanel styleClass="slds-form-element" layout="block" id="est_comm"> 
+                                        <label class="slds-form-element__label"><span class="slds-required" title="required">*</span> Estimated Lease Commencement Date</label>
+                                        <div class="slds-form-element__control">
+                                        <div class="slds-input-has-icon slds-input-has-icon--right"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                                                                    <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                                                                        <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/utility-sprite/svg/symbols.svg#event')}"></use>
+                                                                    </svg>            
+                                            <apex:inputField showDatePicker="false" value="{!objOpp.Estimated_Lease_Commencement_Date__c}" styleclass="slds-input datefield {!IF(objOpp.Estimated_Lease_Commencement_Date__c == null && errMsg == true,'error-input','')}" onkeyup="refreshFields();">
+                                            	<!-- <apex:actionSupport onsubmit="showSpinner()" oncomplete="hideSpinner(); setLookUps();setCurrency();" event="onblur" action="{!refreshFields}" reRender="outgoingsPanel" /> -->
+                                            </apex:inputField>
+                                        </div>
+                                        </div>
+                                         <apex:outputPanel id="errMsg1b" >
+                                                <apex:outputPanel rendered="{!IF(objOpp.Estimated_Lease_Commencement_Date__c == null && errMsg == true,True,False)}">
+                                                    <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                                </apex:outputPanel>
+                                        </apex:outputPanel> 
+                                    </apex:outputPanel>
+                                    
+                                     <apex:outputPanel styleClass="slds-form-element" layout="block" id="act_app"> 
+		                                    	<label class="slds-form-element__label"><span class="slds-required" title="required">*</span> Act Applies</label>
+		                                        <div class="slds-form-element__control">
+		                                        <div class="slds-select_container">
+		                                            <apex:inputfield value="{!objOpp.Retail_Act_Applies__c}" styleclass="slds-select {!IF(objOpp.Retail_Act_Applies__c == null && errMsg == true,'error-input','')}">
+		                                            	 <apex:actionSupport onsubmit="showSpinner()" oncomplete="setLookUps();setCurrency();hideSpinner();" event="onchange" action="{!refreshFields}" reRender="outgoingsPanel" />
+		                                            </apex:inputfield>
+		                                            </div>
+		                                        </div>
+                                                  <apex:outputPanel id="errMsg1c" >
+                                                <apex:outputPanel rendered="{!IF(objOpp.Retail_Act_Applies__c == null && errMsg == true,True,False)}">
+                                                    <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                                </apex:outputPanel>
+                                        </apex:outputPanel>               
+                                        </apex:outputPanel>
+                                        
+                                        <apex:outputPanel layout="none" id="dev_only"> 
+                                        <apex:outputPanel styleClass="slds-form-element" layout="block" rendered="{!objOpp.Development_Unit__c}"> 	
+                                            <label class="slds-form-element__label">Landlord Works Budget</label>
+                                            <div class="slds-form-element__control">       
+                                                <apex:inputField value="{!objOpp.Landlord_Works_Budget__c}" styleclass="currency slds-input" />
+                                            </div> 
+                                       	</apex:outputPanel>
+                                        
+                                           <apex:outputPanel styleClass="slds-form-element" layout="block" rendered="{!objOpp.Development_Unit__c}"> 
+                                            <label class="slds-form-element__label">Base Rent Budget</label>
+                                            <div class="slds-form-element__control">       
+                                                <apex:inputField value="{!objOpp.Base_Rent_Budget__c}" styleclass="currency slds-input" />
+                                            </div>
+                                        	</apex:outputPanel>
+                                         
+                                           <apex:outputPanel styleClass="slds-form-element" layout="block" rendered="{!objOpp.Development_Unit__c}"> 
+                                            <label class="slds-form-element__label">Fitout Contribution Budget</label>
+                                            <div class="slds-form-element__control">       
+                                                <apex:inputField value="{!objOpp.Fitout_Contribution_Budget__c}" styleclass="currency slds-input" />
+                                            </div>
+                                        	</apex:outputPanel>
+                                        </apex:outputPanel>
+                                    <div class="slds-form-element">
+                                        <div class="slds-form-element__control">       
+                                            <label class="slds-checkbox">
+                                                <apex:inputField value="{!objOpp.PLM_Approval_Required__c}">
+                                                </apex:inputField>
+                                                <span class="slds-checkbox--faux"></span>
+                                                <span class="slds-form-element__label checkbox__label">PLM Approval Required</span>
+                                            </label>
+                                        </div>                      
+                                    </div>
+                                    
+                                    <apex:outputPanel id="outgoingsPanel" layout="none">
+                                      <apex:outputPanel styleClass="slds-form-element" layout="block" rendered="{!objOpp.Recovery_Type__c != 'Gross'}">
+                                            <label class="slds-form-element__label"><apex:outputPanel styleclass="slds-required" layout="inline" rendered="{!objOpp.Recovery_Type__c == 'Net'}">*</apex:outputPanel> Outgoings Amount</label>
+                                            <div class="slds-form-element__control">
+                                            <apex:outputfield rendered="{!!objOpp.Custom_Outgoings__c}" value="{!objOpp.Outgoings_Rate__c}"></apex:outputfield>
+                                            <apex:inputField rendered="{!objOpp.Custom_Outgoings__c}" styleClass="currency slds-input {!IF(objOpp.Recovery_Type__c == 'Net' && (objOpp.Outgoings_Rate__c == null || objOpp.Outgoings_Rate__c == 0) && errMsg == true,'error-input','')}" value="{!objOpp.Outgoings_Rate__c}"></apex:inputField>
+                                            </div>
+                                             <apex:outputPanel id="errMsgOutG" >
+                                                <apex:outputPanel rendered="{!IF(objOpp.Recovery_Type__c == 'Net' && (objOpp.Outgoings_Rate__c == null || objOpp.Outgoings_Rate__c == 0) && errMsg == true,True,False)}">
+                                                    <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                                </apex:outputPanel>
+                                        	</apex:outputPanel> 
+                                     </apex:outputPanel>
+                                       <apex:outputPanel styleClass="slds-form-element" layout="block" rendered="{!objOpp.Recovery_Type__c != 'Gross'}">
+                                            <label class="slds-form-element__label"><apex:outputPanel styleclass="slds-required" layout="inline" rendered="{!objOpp.Recovery_Type__c == 'Net' && (objOpp.Unit__r.Building__r.Centre__r.State__c == 'VIC' || objOpp.Unit__r.Building__r.Centre__r.Name == 'Northgate')}">*</apex:outputPanel> Rates and Taxes Amount</label>
+                                            <div class="slds-form-element__control">
+                                              <apex:outputfield rendered="{!!objOpp.Custom_RatesTaxes__c}" value="{!objOpp.Rates_and_Taxes_Amount__c}"></apex:outputfield>
+                                            	<apex:inputField rendered="{!objOpp.Custom_RatesTaxes__c}" styleClass="currency slds-input {!IF(objOpp.Recovery_Type__c == 'Net' 
+                                            	&& (objOpp.Rates_and_Taxes_Amount__c == null || objOpp.Rates_and_Taxes_Amount__c < 1) && errMsg == true 
+                                            	&& (objOpp.Unit__r.Building__r.Centre__r.State__c == 'VIC' || objOpp.Unit__r.Building__r.Centre__r.Name == 'Northgate'),'error-input','')}" value="{!objOpp.Rates_and_Taxes_Amount__c}"></apex:inputField>
+                                            </div>
+                                             <apex:outputPanel id="errMsgRnT" >
+                                                <apex:outputPanel rendered="{!IF(objOpp.Recovery_Type__c == 'Net' && (objOpp.Rates_and_Taxes_Amount__c == null || objOpp.Rates_and_Taxes_Amount__c == 0) && errMsg == true && (objOpp.Unit__r.Building__r.Centre__r.State__c == 'VIC' || objOpp.Unit__r.Building__r.Centre__r.Name == 'Northgate'),True,False)}">
+                                                    <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                                </apex:outputPanel>
+                                        	</apex:outputPanel> 
+                                    </apex:outputPanel>
+                                   </apex:outputPanel>
+                                    <!-- 
+                                    <div class="slds-form-element">
+                                        <div class="slds-form-element__control">       
+                                            <label class="slds-checkbox">
+                                                <apex:inputField value="{!objOpp.Survey_Required__c}">
+                                                </apex:inputField>
+                                                <span class="slds-checkbox--faux"></span>
+                                                <span class="slds-form-element__label checkbox__label">Survey Required</span>
+                                            </label>
+                                        </div>                      
+                                    </div>    
+                                     -->
+                                     <div class="slds-form-element">
+   <label class="slds-form-element__label">Retailer</label>
+  <div class="slds-form-element__control">
+<apex:selectRadio styleClass="convertToLSD" layout="pageDirection" value="{!SelectedRetailerType}">
+    <apex:selectoption itemLabel="Existing Retailer" itemvalue="EXISTING"> </apex:selectoption>
+    <apex:selectoption itemLabel="New Retailer" itemvalue="NEW"> </apex:selectoption>
+     <apex:actionSupport onsubmit="showSpinner()" event="onchange" action="{!SetRetailerType}" reRender="existingAccDetails,errMsg5a, newAccDetails" oncomplete="hideSpinner(); setLookUps();setCurrency();"/>
+</apex:selectRadio>
+                       </div>
+                   </div> 
+                   <!-- 
+                                    <apex:outputPanel id="existingTenant">
+                                        <apex:outputPanel rendered="{!!objOpp.New_Retailer__c}">
+                                            <div class="slds-form-element">
+                                                <div class="slds-form-element__control">
+                                                    <label class="slds-checkbox">
+                                                        <apex:actionRegion >
+                                                            <apex:inputField value="{!objOpp.Existing_Retailer__c}" id="existingTenantVal">
+                                                                <apex:actionSupport onsubmit="showSpinner()" event="onchange" action="{!refreshFields}" reRender="existingAccDetails,errMsg5a" oncomplete="hideSpinner();setLookUp(); "/>
+                                                            </apex:inputField>
+                                                        </apex:actionRegion>
+                                                        <span class="slds-checkbox--faux"></span>
+                                                        <span class="slds-form-element__label checkbox__label">Existing Retailer</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+ -->
+
+                                    <apex:outputPanel id="existingAccDetails">
+       
+                                        <apex:outputPanel rendered="{!IF(objOpp.Existing_Retailer__c == true && objOpp.New_Retailer__c == false,True,False)}">
+                                            <article class="slds-card" style="padding: 0px 10px 10px 10px; margin: 10px 0px;">
+                                                
+                                                <div class="slds-card__body">
+                                                    <div class="slds-form-element">
+                                                        <div class="slds-form-element__control">
+                                                            <apex:inputhidden value="{!objOpp.AccountId}" id="hiddenretailer"/>
+                                                            <div class="slds-lookup" data-select="multi" data-scope="single" data-typeahead="true">
+                                                                <div class="slds-form-element">
+                                                                    <label class="slds-form-element__label"><span class="slds-required" title="required">*</span> Trading Name</label>
+                                                                    <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                                                                        
+                                                                        <input id="lookup" value="{!RetailerName}" class="slds-input {!IF(objOpp.Existing_Retailer__c == true && objOpp.AccountId == null && errMsg == true,'error-input','')}" type="text" aria-autocomplete="list" role="combobox" aria-expanded="false" aria-activedescendant="" />
+                                                                    	
+                                                                    </div>
+                                                                    <span id="SelectedRecord"></span>
+                                                                </div>
+                                                                <div class="slds-lookup__menu" role="listbox" id="results" style="display:none">
+                                                                    <div class="slds-lookup__item">
+                                                                        <button class="slds-button" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                                                            <svg aria-hidden="true" class="slds-icon slds-icon-text-default slds-icon--small">
+                                                                                <use xlink:href="{!URLFOR ($Resource.SalesforceLighteningDesignSystem, 'assets/icons/utility-sprite/svg/symbols.svg#search')}"></use>
+                                                                            </svg>&quot;<span id="keyword"></span>&quot; in Retailers</button>
+                                                                    </div>
+                                                                    <ul class="slds-lookup__list" role="presentation" id="ui_results">                                                                                       
+                                                                    </ul>                           
+                                                                </div>
+                                                            </div>
+                                                            
+                                                        </div>
+                                                        <apex:outputPanel id="errMsg6" >
+                                                <apex:outputPanel rendered="{!IF(objOpp.Existing_Retailer__c == true && objOpp.AccountId == null && errMsg == true,True,False)}">
+                                                    <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                                </apex:outputPanel>
+                                            </apex:outputPanel> 
+                                                    </div>
+                                                </div>
+                                            </article>
+                                            
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel id="newAccDetails">
+                                        <apex:outputPanel rendered="{!IF(objOpp.Existing_Retailer__c == false && objOpp.New_Retailer__c == true,True,False)}">
+                                            <br/>
+                                            
+                                            <article class="slds-card" style="padding: 0px 10px 10px 10px; margin: 10px 0px;">
+                                                <div class="slds-card__body">
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label"><span class="slds-required" title="required">*</span> Trading Name</label>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:inputfield value="{!objOpp.New_Trading_Name__c}" styleclass="slds-input {!IF(objOpp.New_Retailer__c == true && (objOpp.New_Trading_Name__c == null || objOpp.New_Trading_Name__c == '') && errMsg == true,'error-input','')}"/>
+                                                        </div>
+                                                        
+                                                        <apex:outputPanel id="errMsg5c" >
+                                                            <apex:outputPanel rendered="{!IF(objOpp.New_Retailer__c == true && (objOpp.New_Trading_Name__c == null || objOpp.New_Trading_Name__c == '') && errMsg == true,True,False)}">
+                                                                <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                                            </apex:outputPanel>
+                                                        </apex:outputPanel> 
+                                                    </div>  
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label"><span class="slds-required" title="required">*</span> Tenant Entity</label>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:inputfield value="{!objOpp.New_Tenant_Entity__c}" styleclass="slds-input {!IF(objOpp.New_Retailer__c == true && (objOpp.New_Tenant_Entity__c == null || objOpp.New_Tenant_Entity__c == '') && errMsg == true,'error-input','')}"/>
+                                                        </div>
+                                                        <apex:outputPanel id="errMsg5b" >
+                                                            <apex:outputPanel rendered="{!IF(objOpp.New_Retailer__c == true && (objOpp.New_Tenant_Entity__c == null || objOpp.New_Tenant_Entity__c == '') && errMsg == true,True,False)}">
+                                                                <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                                            </apex:outputPanel>
+                                                        </apex:outputPanel> 
+                                                    </div>
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label">Tenant ACN</label>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:inputfield value="{!objOpp.New_Tenant_ACN__c}" styleclass="slds-input"/>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </article>
+                                            
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel id="errMsg5a" >
+                                        <apex:outputPanel rendered="{!IF(objOpp.Existing_Retailer__c == false && objOpp.New_Retailer__c == false && errMsg == true,True,False)}">
+                                            <label class="slds-form-element__label" style="color:red;">This field is required</label>
+                                        </apex:outputPanel>
+                                    </apex:outputPanel> 
+                                    <br/>    
+                                    <apex:outputPanel rendered="{!$User.UIThemeDisplayed == 'Theme4t'}"> 
+                                        <div class="slds-docked-form-footer" style="margin-top: 30px;">
+                                            <apex:commandButton action="{!cancelDeal}" value="Cancel" styleclass="slds-button slds-button--neutral" 
+                                            immediate="true" />
+                                            <apex:commandButton action="{!createDeal}" rendered="{!objOpp.Unit__r.Is_Active__c == true && objOpp.Unit__r.Is_Building_Active__c}" 
+                                            value="Next" styleclass="slds-button slds-button--brand" onclick="showSpinner()" oncomplete="hideSpinner();setLookUps();setCurrency();;showDateField();" 
+                                            reRender="outgoingsPanel, rec_type,est_comm,act_app,errMsgHeader,oppIdHidden,errMsg2,errMsg3,errMsg4,errMsg5,errMsg6,errMsg5a,errMsg5b,deal_type,newAccDetails,existingAccDetails" />
+                                        </div>
+                                    </apex:outputPanel> 
+                                    <apex:outputPanel rendered="{!$User.UIThemeDisplayed != 'Theme4t'}"> 
+                                        <div class="slds-box">
+                                            <apex:commandButton action="{!cancelDeal}" value="Cancel" styleclass="slds-button slds-button--neutral" immediate="true" />
+                                            
+                                            <apex:commandButton action="{!createDeal}" value="Next"  rendered="{!objOpp.Unit__r.Is_Active__c == true && objOpp.Unit__r.Is_Building_Active__c}" 
+                                            styleclass="slds-button slds-button--brand" onclick="showSpinner()" oncomplete="hideSpinner();setLookUps();setCurrency();;showDateField();" 
+                                            reRender="outgoingsPanel, rec_type,est_comm,act_app,errMsgHeader,oppIdHidden,errMsg2,errMsg3,errMsg4,errMsg5,errMsg6,errMsg5a,errMsg5b,deal_type,newAccDetails,existingAccDetails,error-string" />
+                                         	<!-- 
+                                         	<apex:commandButton  value="Next2" action="{!saveDeal}" onclick="showSpinner();" oncomplete="createDeal();"
+                                         	styleclass="slds-button slds-button--brand" reRender="rec_type,est_comm,act_app,errMsgHeader,oppIdHidden,errMsg2,errMsg3,errMsg4,errMsg5,errMsg6,errMsg5a,errMsg5b,deal_type,newAccDetails,existingAccDetails,error-string" />
+                                        	<apex:outputPanel id="error-string" style="margin-left: 1rem; color: red;">
+		                                    	<apex:outputText escape="false" rendered="{!IF(errMsg == true,True,False)}" value="{!errString}"></apex:outputText> 
+		                                    </apex:outputPanel>
+		                                     -->
+                                        </div>
+                                    </apex:outputPanel>
+                                    
+                                    <apex:actionStatus id="statuses" startText="Processing..." onstart="showSpinner()" onstop="hideSpinner();"/> 
+                                   
+                                    <br/> 
+                                    <br/>
+                                     </div>
+                                </div>
+                            </div>
+                            </apex:actionRegion>
+                        </apex:outputpanel>
+                        
+                    </div>
+                    <apex:actionFunction name="refreshFields" action="{!refreshFields}" status="statuses" rerender="outgoingsPanel" oncomplete="setLookUps();setCurrency();showDateField();" />
+                   
+                    <apex:actionFunction name="createDeal" action="{!createDeal}" oncomplete="hideSpinner();setLookUps();setCurrency();showDateField();"  
+                    rerender="rec_type,est_comm,act_app,errMsgHeader,oppIdHidden,errMsg2,errMsg3,errMsg4,errMsg5,errMsg6,errMsg5a,errMsg5b,deal_type,newAccDetails,existingAccDetails,error-string" status="statuses"/>
+
+                    <!-- Adding the Building HArtnett Asset Field to help with deleting from the Recovery Type picklist -->
+                    <apex:inputhidden value="{!objOpp.Unit__r.Building__r.Hartnett_Asset__c}" id="hartnettAsset"/>
+
+
+                </apex:form>
+            </apex:outputpanel>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+            <script src="{!$Resource.autoNumeric}"></script>
+            <script>
+                function showSpinner(){
+                $('.slds-spinner_container').removeClass('slds-hide');
+                $('.slds-spinner_container').addClass('slds-show');    
+                
+                var winWidth = $(document).width();
+                var winHeight = $(document).height();
+                
+                $('.slds-spinner_container').css({ 'width': winWidth,'height': winHeight });                   
+            }
+            
+            function hideSpinner(){                 
+                $('.slds-spinner_container').removeClass('slds-show');
+                $('.slds-spinner_container').addClass('slds-hide');    
+            }   
+            
+            function setLookUp(){
+                $('#lookup').keyup(function(e) 
+                                   {
+                                       if($('#lookup').val() != ''){                       
+                                           $('#results').css("display","block");
+                                           $('#lookup').attr('aria-expanded','true'); 
+                                           $('#keyword').html($('#lookup').val());
+                                           Visualforce.remoting.Manager.invokeAction(
+                                               '{!$RemoteAction.VC_DealsController.queryAccounts}',
+                                               $('#lookup').val(),                                                 
+                                               function(result, event){
+                                                   if (event.status) {
+                                                       $('#ui_results').empty();
+                                                       populateLookup(result);
+                                                   } else if (event.type === 'exception') {
+                                                       $('#lookup') = 'ERROR: ' + event.message;   
+                                                   } else {
+                                                       $('#lookup') = 'ERROR: ' + event.message;
+                                                   }
+                                               }, 
+                                               {escape: true}
+                                           );            
+                                           
+                                       }else{
+                                           $('#results').css("display","none");
+                                       }
+                                   });
+                function populateLookup(result){
+                    if(result){                        
+                        $( result ).each(function() {                        
+                            console.log(this);
+                            $('#ui_results').append('<li class="slds-lookup__item">' + 
+                                                    '<a id="' + this.Id + '" href="javascript:void(0)" role="option">' + 
+                                                    '<svg aria-hidden="true" class="slds-icon slds-icon-standard-account slds-icon--small">' + 
+                                                    '<use xlink:href="{!URLFOR ($Resource.SalesforceLighteningDesignSystem, 'assets/icons/utility-sprite/svg/symbols.svg#company')}"></use>' + 
+                                                    '</svg>' + this.Name + ' - ' + this.Tenant_Entity__c + (typeof this.Tenant_CABID__c != "undefined" ? " - " + this.Tenant_CABID__c : "") + '</a>' + 
+                                                    '</li>');
+                        });
+                        
+                        $('ul.slds-lookup__list a').click(function(e) 
+                                                          {                                  
+                                                              $('#lookup').val($(this)[0].innerText);
+                                                              $('#lookup').attr('aria-activedescendant',$(this)[0].id);
+                                                              $('#lookup').attr('aria-expanded','false');
+                                                              $('#results').css("display","none");
+                                                              //$('#SelectedRecord').html('Selected Record: <strong>'+ $(this)[0].innerText +'</strong>');
+                                                              $('[id$=hiddenretailer]').val($(this)[0].id);
+                                                              //$('{!$Component.mainForm.hiddenretailer}').val($(this)[0].id);
+                                                              //document.getElementById('{!$Component.mainForm.hiddenretailer}').value = $(this)[0].id;
+                                                              
+                                                               //$('#lookup').removeClass("error-input");
+                                                          }); 
+                    }
+                }
+            }
+            
+      
+            $(document).ready(function() 
+             {  
+                 setLookUps();
+                 setCurrency();
+                 hideRecoveryTypeValues();
+             });
+                              
+             function setLookUps() {
+             	setLookUp();
+             } 
+
+			function setCurrency() {
+			    $('.currency').autoNumeric("init", {
+			        aSep: ',',
+			        aDec: '.',
+			        aForm: false
+			    });
+			}
+
+            function hideRecoveryTypeValues() {
+
+                if (document.getElementById('{!$Component.mainForm.hartnettAsset}').value == 'true')
+                {
+
+                    var selectobject =
+                        document.getElementById('{!$Component.mainForm.recoveryTypePicklist}');
+
+                    // iterate over option
+                    for (var i=0; i<selectobject.length; i++) {
+                        // remove both Net and Gross options
+                        if (selectobject.options[i].value == 'Net' ) {
+                            selectobject.remove(i);
+                        }
+
+                        if (selectobject.options[i].value == 'Gross' ) {
+                            selectobject.remove(i);
+                        }
+                    }
+
+                }else{
+
+                    var selectobject =
+                        document.getElementById('{!$Component.mainForm.recoveryTypePicklist}');
+
+                    // iterate over option
+                    for (var i=0; i<selectobject.length; i++) {
+                        // remove Gross + Promo option
+                        if (selectobject.options[i].value == 'Gross + Promo' ) {
+                            selectobject.remove(i);
+                        }
+                    }
+
+                }
+            }
+
+                function convertCheckBoxToLDS() {
+			    var Row = document.getElementsByClassName("convertToLSD");
+			    for (var k = 0; k < Row.length; k++) {
+			        var colTds = Row[k].getElementsByTagName("td");
+			        for (var i = 0; i < colTds.length; i++) {
+			            var inrHtml = colTds[i].innerHTML;
+			            var chkId = inrHtml.substring(inrHtml.indexOf("id=") + 4, inrHtml.indexOf("\"", inrHtml.indexOf("id=") + 4));
+			            var chkBx = inrHtml.substring(inrHtml.indexOf("<input"), inrHtml.indexOf(">") + 1);
+			            var chkLable = colTds[i].getElementsByTagName("label")[0].textContent;
+			            var typeOfInput = colTds[i].getElementsByTagName("input")[0].getAttribute("type");
+			            var newChkBox = '<label class="slds-' + typeOfInput + '" for="' + chkId + '">' + chkBx +
+			                '<span class="slds-' + typeOfInput + '--faux"></span>' +
+			                '<span class="slds-form-element__label">' + chkLable + '</span>' +
+			                '</label>';
+			            colTds[i].innerHTML = newChkBox;
+			        }
+			    }
+			}
+
+		 $( document ).ready(function() {
+        	convertCheckBoxToLDS();
+	    });
+                      
+            
+            </script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.js"></script>
+          <script src="{!URLFOR($Resource.aljs, '/jquery.aljs-init.min.js')}"></script>
+        	<script src="{!URLFOR($Resource.aljs, '/jquery.aljs-datepicker.min.js')}"></script>
+             <script>
+		        //Assigning SLDS Static Resource Path To A Variable To Use It With ALJS Initialization
+		        var assetsLoc = '{!URLFOR($Resource.SalesforceLighteningDesignSystem)}';
+		        
+		        //ALJS Initialization   
+		        
+		        $.aljsInit({
+		            assetsLocation: assetsLoc, //SLDS Static Resource Path
+		            scoped: true
+		        });
+		        
+		        $(document).ready(function() {
+		            
+		            //Initializing Datepicker with options To The SLDS Input on document ready.
+		            showDateField ();
+		        });
+		         function showDateField (){
+	            $('.datefield').datepicker({
+                    format: 'DD/MM/YYYY', //Date Format Of Datepicker Input Field
+                    onSelect: function(datepicker) {
+                    	showSpinner();
+                        refreshFields();
+                    }
+                });
+           		 }
+		        
+		        </script>
+		        
+        </body>
+    </html>
+</apex:page>

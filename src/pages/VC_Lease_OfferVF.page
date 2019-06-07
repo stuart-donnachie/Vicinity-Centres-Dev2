@@ -1,0 +1,530 @@
+<!--
+    Date        : 29-08-2016
+    Project     : Lease Management System
+    Description : Lease offer form to be generated from the opportunity detail layout
+    
+    Change History
+    --------------      
+
+--> 
+<apex:page standardcontroller="opportunity" extensions="VC_Deal_DetailsController" renderAs="pdf" showHeader="false" 
+    sidebar="false" applyBodyTag="false" applyHtmlTag="false" standardStylesheets="false">
+    <html> 
+        <head>
+            <style>
+                body {
+                    font-family: sans-serif;
+                    font-weight: 400;
+                    font-size: 14px;
+                }
+                
+                h3 {
+                    text-align: center;
+                }
+                
+                table {
+                     border-collapse: collapse;
+                     width: 100%;
+                }
+                    
+                table, tr, td, th {
+                     border: 1px solid black;
+                }
+                
+                th, td {
+                    padding: 5px 15px 5px 5px;
+                }
+                
+                th {
+                    background-color: #edf2f7;
+                }
+                
+                img {
+                    
+                    height: 75px;
+                    width: 90px;
+                }
+            </style>
+        </head>  
+        <body> 
+            <div style="float: right;">
+                <apex:image value="{!$Resource.Lease_Offer_Logo}" width="90" height="90" />
+            </div>
+            <br/>
+            <br/>
+            <br/>   
+            <br/>
+            <br/>
+            <h3>Lease Offer Instruction Form</h3>
+            <br/>
+            <br/>
+            
+            <h4>Deal Setup Information</h4>
+            <table>
+                <tr>
+                    <th>Leasing Executive</th>
+                    <td><apex:outputField value="{!objOpp.Leasing_Executive__c}"/></td>
+                    <th>Centre Name</th>
+                    <td><apex:outputField value="{!objOpp.Centre__r.Name}"/></td>
+                </tr>
+                <tr>
+                    <th>Unit Number</th>
+                    <td><apex:outputField value="{!objOpp.Unit__r.Name}"/></td>
+                    <th>Area of Premises (sqm)</th>
+                    <td><apex:outputField value="{!objOpp.Area_of_premises_sqmt__c}"/></td>                 
+                </tr>
+                <tr>
+                    <th>Recovery Type</th>
+                    <td><apex:outputField value="{!objOpp.Recovery_Type__c}"/></td>
+                    <th>Reconfiguration</th>
+                    <td><apex:outputField value="{!objOpp.Reconfig__c}"/></td>                  
+                </tr>
+                <tr>
+                    <th>CAPEX Required</th>
+                    <td><apex:outputField value="{!objOpp.Is_CAPEX_approval_required__c}"/></td>
+                    <th>Development Unit</th>
+                    <td><apex:outputField value="{!objOpp.Development_Unit__c}"/></td>                  
+                </tr>
+                <tr>
+                    <th>Development Budget</th>
+                    <td><apex:outputField value="{!objOpp.Dev_Budget__c}"/></td>
+                    <th>Development Clause</th>
+                    <td><apex:outputField value="{!objOpp.Dev_Clause__c}"/></td>
+                </tr>
+                <tr>
+                	<th>Salesforce Id</th>
+                    <td><apex:outputField value="{!objOpp.Deal_Key__c}"/></td>
+                    <th></th>
+                    <td></td>
+                </tr>
+            </table>
+            
+            <br/>
+            
+            <h4>Tenant Information</h4>
+            <table>
+                <tr>
+                    <th>Tenant Entity</th>
+                    <td><apex:outputText value="{!tenantEntity}"/></td>
+                    <th>Tenant ACN</th>
+                    <td><apex:outputText value="{!tenantACN}"/></td>            
+                </tr>
+                <tr>
+                    <th>Trading Name</th>
+                    <td><apex:outputText value="{!tenantName}"/></td>                   
+                    <th>Registered Address</th>
+                    <td><apex:outputText value="{!conRegAddress}"/></td>
+                </tr>               
+            </table>
+            
+            <br/>
+            <h4>Basic Deal Information</h4>
+            <table>
+                <tr>
+                    <th>Deal Type</th>
+                    <td><apex:outputField value="{!objOpp.Deal_Type__c}"/></td>
+                    <th>Early Renewal</th>
+                    <td><apex:outputField value="{!objOpp.Early_Renewal__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Refit</th>
+                    <td><apex:outputField value="{!objOpp.Refit__c}"/></td>
+                    <th><apex:outputText rendered="{!objOpp.Refit__c}">Refit Completion Date</apex:outputText></th>
+                    <td><apex:outputField rendered="{!objOpp.Refit__c}" value="{!objOpp.Refit_Completion_Date__c}"/></td>
+                </tr>   
+                <tr>
+                    <th>Estimated Handover Date</th>
+                    <td><apex:outputField value="{!objOpp.Estimated_Handover_Date__c}"/></td>
+                    <th>Common Opening Date</th>
+                    <td><apex:outputField value="{!objOpp.Is_Common_Opening_Date__c}"/></td>
+                </tr>
+                <tr>
+					<th>Commencement Date</th>
+                    <td><apex:outputField value="{!objOpp.Estimated_Lease_Commencement_Date__c}"/></td>
+                    <th>Tenant Classification</th>
+                    <td><apex:outputField value="{!objOpp.Tenant_Classification__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Tenant Category</th>
+                    <td><apex:outputField value="{!objOpp.Tenant_Category__c}"/></td>
+                    <th><apex:outputText rendered="{!objOpp.Deal_Type__c =='New Tenant Standard'}">Fitout Days</apex:outputText></th>
+                    <td><apex:outputField rendered="{!objOpp.Deal_Type__c =='New Tenant Standard'}" value="{!objOpp.Fit_out_Period__c}"/></td>
+                </tr>  
+                <tr>
+                    <th>Exclusivity of Permitted Use</th>
+                    <td><apex:outputField value="{!objOpp.Exclusivity_of_Permitted_Use__c}"/></td>
+                    <th>Liquor Licence</th>
+                    <td><apex:outputField value="{!objOpp.Liquor_Licence__c}"/></td>
+                </tr> 
+            </table> 
+            <br/>
+            <apex:outputPanel rendered="{!IF(NOT(ISBLANK(objOpp.Permitted_Use_Profile__c)), true, false)}">
+                <table>
+                    <tr>
+                        <th>Permitted Use</th>
+                        <td width="50%"><apex:outputField value="{!objOpp.Permitted_Use_Profile__c}"/></td>
+                    </tr>
+                </table> 
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!IF(ISBLANK(objOpp.Permitted_Use_Profile__c), true, false)}">
+                <table>
+                    <tr>
+                        <th>Permitted Use</th>
+                        <td width="50%"><apex:outputField value="{!objOpp.Selected_Permitted_Use__r.Name}"/></td>
+                    </tr>
+                </table> 
+            </apex:outputPanel>
+            <br/>
+            <table>
+                    <tr>
+                        <th width="30%">Schedule of Works Type</th>
+                        <td><apex:outputText value="{!objOpp.Works_Type__c}"/></td>
+                    </tr>
+              </table> 
+            <br/>
+            <div style="page-break-after:always;" ></div>
+
+            
+            <h4>Commercial Terms</h4>
+            <table>
+                <tr>
+                    <th>Lease Term Years</th>
+                    <td><apex:outputField value="{!objOpp.Lease_Term_Years__c}"/></td>
+                    <th>Lease Term Months</th>
+                    <td><apex:outputField value="{!objOpp.Lease_Term_Months__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Lease Term Days</th>
+                    <td><apex:outputField value="{!objOpp.Lease_Term_Days__c}"/></td>
+                    <th><apex:outputText value="{!IF(objOpp.Recovery_Type__c == 'Net','Base Rent','Gross Rent')}"/></th>
+                    <td>$<apex:outputText value="{!IF(objOpp.Recovery_Type__c == 'Net',objOpp.Base_Rent__c,objOpp.Gross_Rent__c)}" /></td> 
+                </tr>
+                <tr>
+                    <th>Promo Contribution Percentage</th>
+                    <td><apex:outputField value="{!objOpp.Promotion_Contribution_Percent__c}"/></td>
+                    <th>Promo Amount</th>
+                    <td><apex:outputField value="{!objOpp.Promo_Amt_Year_1__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Promo Review</th>
+                    <td><apex:outputField value="{!objOpp.Promo_ReviewRate__c}"/></td>
+                    <th>Rent Review</th>
+                    <td><apex:outputField value="{!objOpp.Rent_Review_Percentage__c}"/></td>
+                </tr>
+            </table>
+            
+            <br/>
+            
+            <h4>Security Requirements</h4>
+            <table>
+                <tr>
+                    <th>Bank Guarantee Required</th>
+                    <td><apex:outputField value="{!objOpp.Bank_Guarantee_Requirement__c}"/></td>
+                    <th>Bank Guarantee Months</th>
+                    <td><apex:outputField value="{!objOpp.Bank_Guarantee_Months__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Bank Guarantee Amount</th>
+                    <td><apex:outputField value="{!objOpp.Bank_Guarentee__c}"/></td>
+                    <th>Group Security</th>
+                    <td><apex:outputField value="{!objOpp.Group_Security__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Personal Guarantee</th>
+                    <td><apex:outputField value="{!objOpp.Personal_Guarantee__c}"/></td>                
+                    <th>No of Personal Guarantees</th>
+                    <td><apex:outputField value="{!objOpp.No_of_Personal_Guarantee__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Parent Guarantee</th>
+                    <td><apex:outputField value="{!objOpp.Parent_Guarentee__c}"/></td>
+                    <th>Parent Guarantor Name</th>
+                    <td><apex:outputField value="{!objOpp.Parent_Guarantor_Name__c}"/></td>                 
+                </tr>
+            </table>
+            
+            <br/>
+            
+            <h4>Fee and Charges</h4>
+            <table>
+                <tr>
+                    <th>Percentage Rent Category</th>
+                    <td><apex:outputField value="{!objOpp.Percentage_Rent_Category__c}"/></td>
+                    <th>Percentage Rent Rate</th>
+                    <td><apex:outputField value="{!objOpp.Percentage_Rent_Rate__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Percentage Rent Threshold</th>
+                    <td><apex:outputField value="{!objOpp.Percentage_Rent_Threshold__c}"/></td>
+                    <th>Artificial Threshold Amount</th>
+                    <td><apex:outputField value="{!objOpp.Artificial_Threshold_Amount__c}"/></td>
+                </tr>
+                <tr>
+               	 	<apex:outputPanel rendered="{!IF(objOpp.Deal_Type__c !='Renewal',True,False)}" layout="none">
+                    	<th>Rent in Advance</th>
+                    	<td><apex:outputField value="{!objOpp.Rent_Advance__c}"/></td>
+                    </apex:outputPanel>
+                    <th>Refurbishment Contribution</th>
+                    <td><apex:outputField value="{!objOpp.Refurbishment_Contribution__c}"/></td>
+                </tr>
+                <apex:outputPanel rendered="{!objOpp.Deal_Type__c =='New Tenant Standard'}" layout="none">
+                <tr>
+                    <th>Fitout Contribution</th>
+                    <td><apex:outputField value="{!objOpp.Fitout_Contribution__c}"/></td>
+                    <th><apex:outputText rendered="{!objOpp.Fitout_Contribution__c}">Fitout Contribution Amount</apex:outputText></th>
+                    <td><apex:outputField rendered="{!objOpp.Fitout_Contribution__c}" value="{!objOpp.Fitout_Contribution_Amount__c}"/></td>
+                </tr>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!objOpp.Lease_Incentive__c}" layout="none">
+                <tr>
+                    <th>Lease Incentive Days</th>
+                    <td><apex:outputField value="{!objOpp.Lease_Incentive_Days__c}"/></td>
+                    <th>Lease Incentive Amount</th>
+                    <td><apex:outputField value="{!objOpp.Lease_Incentive_Amount__c}"/></td>
+                </tr>
+                </apex:outputPanel>
+                <tr>
+                    <th>Hoarding : Development Hoarding</th>
+                    <td><apex:outputField value="{!objOpp.Hoarding_Development_Unit__c}"/></td>
+                    <th>Hoarding : At Commencement</th>
+                    <td><apex:outputField value="{!objOpp.Hoarding_At_Commencement__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Hoarding : During / End Term</th>
+                    <td><apex:outputField value="{!objOpp.Hoarding_During_End_Term__c}"/></td>
+                    <th><apex:outputText rendered="{!objOpp.Hoarding_At_Commencement__c || objOpp.Hoarding_Development_Unit__c || objOpp.Hoarding_During_End_Term__c}">Hoarding : Rate at Commencement</apex:outputText></th>
+                    <td><apex:outputField rendered="{!objOpp.Hoarding_At_Commencement__c || objOpp.Hoarding_Development_Unit__c || objOpp.Hoarding_During_End_Term__c}" value="{!objOpp.Hoarding_Rate_at_Commencement__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Design Review Fees : At Commencement</th>
+                    <td><apex:outputField value="{!objOpp.Design_Review_Fees_At_Commencement__c}"/></td>
+                    <th>Design Review Fees : During Term</th>
+                    <td><apex:outputField value="{!objOpp.Design_Review_Fees_During_Term__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Design Review Fees: Rate at commencement</th>
+                    <td><apex:outputField value="{!objOpp.Design_Review_Fees_Rate_at_commencement__c}"/></td>
+                    <th></th>
+                    <td></td>
+                </tr>
+                <apex:outputPanel rendered="{!objOpp.Development_Unit__c}" layout="none">
+                <tr>
+                    <th>Opening Promotion</th>
+                    <td><apex:outputField value="{!objOpp.Opening_Promotion__c}"/></td>
+                    <th><apex:outputPanel layout="none" rendered="{!objOpp.Opening_Promotion__c}">Opening Promotion Amount</apex:outputPanel></th>
+                    <td><apex:outputField rendered="{!objOpp.Opening_Promotion__c}" value="{!objOpp.Opening_Promotion_Amount__c}"/></td>
+                </tr>
+                </apex:outputPanel>
+            </table>
+            
+            <br/>
+            
+            <h4>Clauses</h4>
+            <table>
+                <tr>
+                    <th>Seating Licence Area</th>
+                    <td><apex:outputField value="{!objOpp.Seating_License_Area__c}"/></td>
+                	<th>Surrender These Premises : Date</th>
+                    <td>
+                    <apex:outputField value="{!objOpp.Surrender_these_premises_Date__c}" rendered="{!objOpp.Surrender_these_premises_Date_Options__c == 'Fixed Date'}"/>
+                    <apex:outputField value="{!objOpp.Surrender_these_premises_Date_Options__c}" rendered="{!objOpp.Surrender_these_premises_Date_Options__c != 'Fixed Date'}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Surrender These Premises : Surrender Fee</th>
+                    <td><apex:outputField value="{!objOpp.Surrender_these_premises_Fees__c}"/></td>
+                    <th>Surrender These Premises : Legal Costs</th>
+                    <td><apex:outputField value="{!objOpp.Surrender_these_premises_Legal_Cost__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Surrender These Premises : Make Good</th> 
+                    <td><apex:outputField value="{!objOpp.Surrender_these_premises_Make_Good__c}"/></td>
+                    <th>Surrender These Premises : Unit No</th> 
+                    <td><apex:outputField value="{!objOpp.Surrender_these_premises_Unit__c}"/></td>
+                </tr>
+                <tr>
+                	<th>Surrender Other Premises : Date</th>
+                    <td>
+                    <apex:outputField value="{!objOpp.Surrender_other_premises_Date__c}" rendered="{!objOpp.Surrender_other_premises_Date_Options__c == 'Fixed Date'}"/>
+                    <apex:outputField value="{!objOpp.Surrender_other_premises_Date_Options__c}" rendered="{!objOpp.Surrender_other_premises_Date_Options__c != 'Fixed Date'}"/>
+                    </td>
+                    <th>Surrender Other Premises : Surrender Fee</th>
+                    <td><apex:outputField value="{!objOpp.Surrender_other_premises_Fees__c}"/></td>
+
+                </tr>
+                <tr>
+                	<th>Surrender Other Premises : Legal Costs</th>
+                    <td><apex:outputField value="{!objOpp.Surrender_other_premises_Legal_Cost__c}"/></td>
+                    <th>Surrender Other Premises : Make Good</th>
+                    <td><apex:outputField value="{!objOpp.Surrender_other_premises_Make_Good__c}"/></td>
+                    
+                </tr>
+                <tr>
+                	<th>Surrender Other Premises : Unit No</th>
+                    <td><apex:outputField value="{!objOpp.Surrender_other_premises_Unit__c}"/></td>
+                    <!-- 
+                	<th>Vacant Possession</th>
+                    <td><apex:outputField value="{!objOpp.Deal_Priority__c}"/></td>
+                     -->
+                </tr>
+                <tr>
+                	<th>Exclusivity Area Zone</th>  
+                    <td><apex:outputField value="{!objOpp.Exclusion_Zone_Detail__c}"/></td>
+                    <th>Common Area Trading</th>
+                    <td><apex:outputField value="{!objOpp.Common_Area_Overlease_line_trading_Deta__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Number of further terms</th>
+                    <td><apex:outputField value="{!objOpp.No_of_further_terms__c}"/></td>
+                    <!-- 
+                    <th>Years per further term</th>
+                    <td><apex:outputField value="{!objOpp.Years_per_further_term__c}"/></td>
+                     -->
+                </tr>
+                <tr>
+                    <th>Rent further term commence:Market Fixed</th>
+                    <td><apex:outputField value="{!objOpp.Rent_further_term_commence_Market_Fixed__c}"/></td>
+                    <!-- 
+                    <th>Option further term: Annual Reviews</th>
+                    <td><apex:outputField value="{!objOpp.Option_further_term_Annual_Reviews__c}"/></td>
+                     -->
+                </tr>
+                <tr>
+                    <th>Number of exclusive car parks</th>
+                    <td><apex:outputField value="{!objOpp.Number_of_exclusive_car_parks__c}"/></td>
+                    <th>Car park fee amount</th>
+                    <td><apex:outputField value="{!objOpp.Car_park_fee_amount__c}"/></td>
+                </tr>
+                <tr>
+                    <th>Car park signage by tenant</th>
+                    <td><apex:outputField value="{!objOpp.Car_park_signage_by_tenant__c}"/></td>
+                    <th></th>
+                    <td></td>
+                </tr>
+            </table>
+            
+            <br/>
+            <apex:outputPanel layout="none" rendered="{!objOpp.Storage__c}">
+            <h4>Storage</h4>
+            <table>
+                <tr>
+                    <th>Area of Storage</th>
+                    <td><apex:outputField value="{!objOpp.Area_of_Storage__c}"/></td>
+                    <th>Storage Rate</th>
+                    <td><apex:outputField value="{!objOpp.Storage_Rate__c}"/></td>
+                </tr>
+            </table>
+            
+            <br/>
+            </apex:outputPanel>
+            <h4>Standard Special Conditions</h4>
+            <table>
+                <tr>
+                    <th>Special Condition Details</th>
+                    <td width="50%"><apex:outputField value="{!objOpp.Non_Standard_Special_Conditions__c}"/></td>
+                </tr>
+            </table>
+            
+            <br/>
+          
+            <h4>As Is Elements To Remain</h4>
+            <table>
+                <tr>
+                    <th>Existing Fitout To Be Taken Over</th>
+                    <td width="50%"><apex:outputField value="{!objOpp.Existing_Fitout_Taken_Over_By_Tenant__c}"/></td>
+                </tr>
+                <apex:outputPanel rendered="{!IF(contains(objOpp.Existing_Fitout_Taken_Over_By_Tenant__c, 'other'), true, false)}" layout="none">
+                <tr>
+                    <th><apex:outputText >Existing Fitout Other</apex:outputText></th>
+                    <td width="50%"><apex:outputField value="{!objOpp.Existing_Fitout_Other__c}"/></td>
+                </tr>
+                </apex:outputPanel>
+            </table>
+            
+            <br/>
+            
+            <h4>Tenant Contacts And Addresses</h4>
+            <table>
+                <tr>
+                    <th>Tenant Authorised Representative</th>
+                    <td><apex:outputText value="{!conAuthRep}"/></td>
+                    <th>Tenant Authorised Representative Address</th>
+                    <td><apex:outputText value="{!conAuthAddress}"/></td>
+                </tr>
+                <tr>
+                    <th>Tenant Authorised Representative Phone</th>
+                    <td><apex:outputText value="{!conAuthPhone}"/></td>
+                    <th>Tenant Authorised Representative Email</th>
+                    <td><apex:outputText value="{!conAuthEmail}"/></td>
+                </tr>
+                <tr>
+                    <th>Legal Contact</th>
+                    <td><apex:outputText value="{!conLegRep}"/></td>
+                    <th>Legal Contact Address</th>
+                    <td><apex:outputText value="{!conLegAddress}"/></td>
+                </tr>
+                <tr>
+                    <th>Legal Contact Email</th>
+                    <td><apex:outputText value="{!conLegEmail}"/></td>
+                    <th>Legal Contact Phone</th>
+                    <td><apex:outputText value="{!conLegPhone}"/></td>
+                </tr>
+                <tr>
+                    <th>Billing Representative</th>
+                    <td><apex:outputText value="{!conBillRep}"/></td>
+                    <th>Billing Address</th>
+                    <td><apex:outputText value="{!conBillAddress}"/></td>
+                </tr>
+                <tr>
+                    <th>Billing Representative Email</th>
+                    <td><apex:outputText value="{!conBillEmail}"/></td>
+                    <th>Billing Representative Phone</th>
+                    <td><apex:outputText value="{!conBillPhone}"/></td>
+                </tr>
+                <tr>
+                    <th>Guarantor 1 Name</th>
+                    <td><apex:outputText value="{!conGarRep1}"/></td>
+                    <th>Guarantor 1 Address</th>
+                    <td><apex:outputText value="{!conGarAddress1}"/></td>
+                </tr>
+                <tr>
+                    <th>Guarantor 1 Email</th>
+                    <td><apex:outputText value="{!conGar1Email}"/></td>
+                    <th>Guarantor 1 Phone</th>
+                    <td><apex:outputText value="{!conGar1Phone}"/></td>
+                </tr>
+                <tr>
+                    <th>Guarantor 2 Name</th>
+                    <td><apex:outputText value="{!conGarRep2}"/></td>
+                    <th>Guarantor 2 Address</th>
+                    <td><apex:outputText value="{!conGarAddress2}"/></td>
+                </tr>
+                <tr>
+                    <th>Guarantor 2 Email</th>
+                    <td><apex:outputText value="{!conGar2Email}"/></td>
+                    <th>Guarantor 2 Phone</th>
+                    <td><apex:outputText value="{!conGar2Phone}"/></td>
+                </tr>
+                <tr>
+                    <th>Guarantor 3 Name</th>
+                    <td><apex:outputText value="{!conGarRep3}"/></td>
+                    <th>Guarantor 3 Address</th>
+                    <td><apex:outputText value="{!conGarAddress3}"/></td>
+                </tr>
+                <tr>
+                    <th>Guarantor 3 Email</th>
+                    <td><apex:outputText value="{!conGar3Email}"/></td>
+                    <th>Guarantor 3 Phone</th>
+                    <td><apex:outputText value="{!conGar3Phone}"/></td>
+                </tr>
+                <tr>
+                    <th>Notice Address</th>
+                    <td><apex:outputText value="{!conNotAddress}"/></td>
+                    <th></th>
+                    <td></td> 
+                </tr>
+            </table>
+            <br/>
+        </body>
+    </html>
+</apex:page>

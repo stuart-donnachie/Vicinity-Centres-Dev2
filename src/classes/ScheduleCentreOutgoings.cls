@@ -1,0 +1,186 @@
+global class ScheduleCentreOutgoings implements Database.Batchable<sObject>, Database.AllowsCallouts, Database.Stateful {
+	global String token;
+	global Integer page;
+	global Integer totalPages;
+	global Map<String,Id> mapBU;
+
+	global ScheduleCentreOutgoings(String token, Integer page, Integer totalPages, Map<String,Id> mapBU) {
+		this.token = token;
+		this.page = page;
+		this.totalPages = totalPages;
+		this.mapBU = mapBU;
+	}
+
+	global ScheduleCentreOutgoings(Integer page) {
+		this.page = page;
+		this.mapBU = new Map<String,Id>();
+	}
+
+	global ScheduleCentreOutgoings() {
+		this.page = 1;
+		this.mapBU = new Map<String,Id>();
+	}
+
+    global String getToken() {
+    	System.debug('Getting API Token');
+		HttpRequest request = new HttpRequest();
+		request.setMethod('POST');
+		request.setEndpoint('callout:Vicinity_Apigee_Prod');
+		request.setHeader('Content-Length', '0');
+		request.setTimeout(100000);
+
+		Http http = new Http();
+		HttpResponse response = http.send(request);
+		Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+		return String.valueOf(jsonResponse.get('access_token'));
+	}
+
+	global Iterable<sObject> start(Database.BatchableContext bc) {
+		System.debug('Start Executing Centre Outgoings Schedule');
+
+        if (this.mapBU.size() == 0) {
+			for(Business_Unit__c bu : [SELECT Id,Business_Unit_Key__c FROM Business_Unit__c]){
+				this.mapBU.put(bu.Business_Unit_Key__c,bu.Id);
+			}
+        }
+
+		if (String.isEmpty(this.token)) {
+			this.token = this.getToken();
+		}
+
+		return new List<Centre_Outgoings__c>{new Centre_Outgoings__c()};
+	}
+
+	global void execute(Database.BatchableContext bc, List<Centre_Outgoings__c> obj) {
+		System.debug('Executing Centre Outgoings Schedule - Page#'+this.page);
+		try {
+			this.download(this.page);
+		} catch(Exception ex) {
+			ErrorLogHandler.log('Centre Outgoings Schedule Exception - Page#'+ this.page,ex);
+		}
+	}
+
+	global void finish(Database.BatchableContext bc) {
+		System.debug('Finish Executing Centre Outgoings Schedule - Page#'+this.page);
+		if (this.page < this.totalPages) {
+			Database.executeBatch(new ScheduleCentreOutgoings(this.token, this.page + 1, this.totalPages, this.mapBU), 1000);
+		}
+		else  {
+			System.scheduleBatch(new ScheduleRatesAndTaxes(), 'Rates And Taxes Schedule', 0);
+		}
+	}
+
+	global void download(Integer page) {
+		HttpRequest request = new HttpRequest();
+		request.setMethod('GET');
+		request.setHeader('Authorization', 'Bearer ' + this.token);
+		request.setHeader('Cache-Control', 'No-Cache');
+		request.setEndpoint(Global_Settings__c.getInstance().API_URL_2__c+'/building-rates-outgoings?page='+ page);
+		request.setTimeout(30000);
+		Http http = new Http();
+		HttpResponse response = http.send(request);
+		if (hasRedirect(response)) {
+			response = handleRedirect(response);
+		}
+		save(response.getBody());
+	}
+
+	public Boolean hasRedirect(HttpResponse res) {
+		System.debug('HTTP status code: ' + res.getStatusCode());
+		if (res.getStatusCode() >= 300 && res.getStatusCode() <= 307 && res.getStatusCode() != 306) {
+			String loc = res.getHeader('Location');
+			if (loc != null) {
+				System.debug('has redirect: ' + loc);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public HttpResponse handleRedirect(HttpResponse res) {
+      	HttpRequest req = new HttpRequest();
+      	req.setMethod('GET');
+      	req.setEndpoint(res.getHeader('Location'));
+
+		Http http = new Http();
+		HttpResponse response = http.send(req);
+
+		return response;
+	}
+
+	global void save(String jsonResponse) {
+
+		Map<String,Centre_Outgoings__c> mapjsonData = new Map<String,Centre_Outgoings__c>();
+		Set<String> buildingKeySet = new Set<String>();
+
+		JSONParser parser = JSON.createParser(jsonResponse);
+		while(parser.nextToken() != null) {
+			if (this.totalPages == null && parser.getCurrentToken() == JSONToken.FIELD_NAME && parser.getText() == 'total_pages') {
+       	 		parser.nextToken();
+        		this.totalPages = Integer.valueOf(parser.getText());
+    		}
+			if(parser.getCurrentToken() == JSONToken.START_ARRAY) {
+				while(parser.nextToken() != null) {
+					if(parser.getCurrentToken() == JSONToken.START_OBJECT) {
+
+						centreOutgoingsWrapper co = (centreOutgoingsWrapper)parser.readValueAs(centreOutgoingsWrapper.class);
+
+						Centre_Outgoings__c objCo = new Centre_Outgoings__c();
+
+						objCo.Amenity_Code__c = co.amenity_code;
+						objCo.Begin_Date__c = String.isNotEmpty(co.begin_date) ? Date.valueOf(co.begin_date) : null;
+						objCo.Business_Unit__c = mapBU.containsKey(co.business_unit_key) ? mapBU.get(co.business_unit_key) : null;
+						objCo.Business_Unit_Code__c = co.business_unit_code;
+						objCo.Business_Unit_Key__c = co.business_unit_key;
+						objCo.Critical_Date__c = String.isNotEmpty(co.critical_date) ? Date.valueOf(co.critical_date) : null;
+						objCo.Expiry_Date__c = String.isNotEmpty(co.expiry_date) ? Date.valueOf(co.expiry_date) : null;
+						objCo.Log_Class__c = co.log_class;
+						objCo.Log_Level__c = co.log_level;
+						objCo.Last_Updated_By_Job__c = System.now();
+						objCo.Rate__c = String.isNotEmpty(co.rate) ? Decimal.valueOf(co.rate) : null;
+
+						if(String.isNotEmpty(objCo.Amenity_Code__c) && objCo.Begin_Date__c !=null){
+					 	objCo.Unique_Key__c = objCo.Amenity_Code__c + '-' + objCo.Begin_Date__c.day() + objCo.Begin_Date__c.month() + objCo.Begin_Date__c.year() + '-' + objCo.Business_Unit_Code__c;
+
+					 		mapjsonData.put(objCo.Unique_Key__c,objCo);
+						}
+					}
+				}
+			}
+		}
+
+		for(Centre_Outgoings__c c :[SELECT Id, Name, Unique_Key__c
+															FROM Centre_Outgoings__c WHERE Unique_Key__c IN :mapjsonData.keyset()]){
+
+			if(mapjsonData.containsKey(c.Unique_Key__c)){
+				mapjsonData.get(c.Unique_Key__c).Id = c.Id;
+			}
+		}
+
+		try{
+			upsert mapjsonData.values();
+			ErrorLogHandler.log('Centre Outgoings Schedule',String.valueOf(mapjsonData.values().size()), String.valueOf(totalPages), String.valueOf(page), 'Schedule');
+			if(mapjsonData.values().size() == 0 && !Test.isRunningTest()){
+				ErrorLogHandler.log('Error in Centre Outgoings Schedule #'+page, jsonResponse.left(131000));
+				token = null;
+				page -= 1;
+			}
+			//Database.upsert(mapjsonData.values(), false);
+		}catch(exception e) {
+			ErrorLogHandler.log('Centre Outgoings Schedule exception #1 - Exception', e);
+			ErrorLogHandler.log('Centre Outgoings Schedule exception #2 - Exception', jsonResponse);
+		}
+	}
+
+	global class centreOutgoingsWrapper {
+		public String amenity_code;
+		public String log_level;
+		public String log_class;
+		public String business_unit_key;
+		public String rate;
+		public String expiry_date;
+		public String critical_date;
+		public String begin_date;
+		public String business_unit_code;
+	}
+}

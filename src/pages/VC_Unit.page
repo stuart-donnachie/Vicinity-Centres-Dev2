@@ -1,0 +1,1406 @@
+<apex:page id="thePage" standardcontroller="Unit__c" extensions="VC_Units_Controller" sidebar="false" 
+           showHeader="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en"  cache="true" standardStylesheets="false">
+        <head>
+            <meta charset="utf-8" />
+            <meta http-equiv="x-ua-compatible" content="ie=edge" />
+            <title>Unit</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <apex:stylesheet value="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
+        </head>
+        <body>
+            
+            <apex:form id="mainForm">
+                <style>
+                	<apex:outputPanel rendered="{!$User.UIThemeDisplayed == 'Theme4t'}" layout="none"> 
+                    .datePicker{
+                    display:none;
+                    }
+                	</apex:outputPanel>
+                    .lightening-scope .slds-card {background-color: #fff !important;}
+                    .slds-card__body{padding: .75rem;}
+                    .xlookup input.slds-input{
+                    width: 92% !important;
+                    }
+                    
+                    .slds-form-element__control .lookupInput a.slds-input{
+                    width: auto;
+                    border: none;
+                    }
+                    .msgIcon {
+                    display: none!important
+                    }
+                    .customMessage * {
+                    color: #fff!important
+                    }
+                    .customMessage {
+                    margin: 5px 0!important;
+                    /* max-width: 1280px; */
+                    opacity: 1!important;
+                    width: 100%;
+                    font-size: 12px;
+                    border: 0px;
+                    padding-left: 10px;
+                    }
+                    .message {
+                    opacity: .1
+                    }
+                    .slds-notify_container{
+                    position: static !important;
+                    }
+                    .lightening-scope .slds-form-element {
+                    line-height: 2.5;
+                    }
+                    .slds-form-element{
+                    margin-top: .5rem;
+                    }
+                    
+                    .errorM3 {
+                    color: #fff !important;
+                    background-color: #c23934 !important;
+                    padding: .5rem;
+                    text-align: center;
+                    position: relative;
+                    font-weight: 300;
+                    line-height: 2.5em;
+                    }
+                    .lightening-scope .slds-spinner_container{
+                    z-index: 99999999999 !important;
+                    }
+                    h1 {
+				    display: block;
+				    font-size: 2em;
+				    -webkit-margin-before: 0.67em;
+				    -webkit-margin-after: 0.67em;
+				    -webkit-margin-start: 0px;
+				    -webkit-margin-end: 0px;
+				    font-weight: bold;
+				}
+				
+				
+                </style>
+                <apex:outputPanel rendered="{!Unit__c.Id == null}">
+                    <center><h1>Unauthorized</h1></center> 
+                </apex:outputPanel>
+                <div class="lightening-scope">
+                    {!debug}
+                    <apex:outputPanel id="pagePanel" rendered="{!Unit__c.Id != null}">
+                        <apex:outputpanel id="messagePanel">
+                            <div class="slds-notify_container">
+                                <apex:messages id="messages" styleClass="errorM3"/> 
+                            </div>
+                        </apex:outputpanel> 
+                        <div class="slds-page-header" role="banner">
+                            <div class="slds-media">
+                                <div class="slds-media__figure">
+                                    <svg aria-hidden="true" class="slds-icon slds-icon-standard-opportunity">
+                                        <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/standard-sprite/svg/symbols.svg#account')}"></use>
+                                    </svg>
+                                </div>
+                                <div class="slds-media__body">
+                                    <p class="slds-page-header__title slds-truncate" >Unit</p>
+                                    <p class="slds-text-body--small"><apex:outputText rendered="{!!IsEdit}">View Unit</apex:outputText><apex:outputText rendered="{!IsEdit}">Edit Unit</apex:outputText></p>
+                                </div>
+                                <div class="slds-media__figure slds-media__figure--reverse">
+                                    <apex:commandButton action="{!cancel}" value="Cancel" styleclass="slds-button slds-button--neutral" rendered="{!IsEdit}"/> 
+                                    <apex:commandButton value="Edit" styleclass="slds-button slds-button--neutral" action="{!customEdit}"  onclick="showSpinner();" oncomplete="hideSpinner();" immediate="true" rendered="{!!IsEdit}"/>
+                                    <apex:commandButton value="Save" styleclass="slds-button slds-button--neutral" action="{!customSave}" rendered="{!IsEdit && Unit__c.Id != null}"/>
+                                    <apex:commandButton value="Create Deal" styleclass="slds-button slds-button--brand" onclick="showSpinner();" action="{!createDeal}" rendered="{!!IsEdit && Unit__c.Is_Active__c && Unit__c.Is_Building_Active__c}"/>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <apex:outputPanel id="contentPanel">
+                            <div>
+                                <article class="slds-card">
+                                    <div class="slds-card__header slds-grid">
+                                    </div>
+                                    <apex:outputPanel id="topPanel">
+                                        <div class="slds-card__body">
+                                            <div class="slds-grid slds-wrap slds-grid--pull-padded">
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Name.Label}"/></label>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Name}" styleclass="slds-form-element__static"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Building__c.Label}"/></label>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Building__c}" styleclass="slds-form-element__static" />
+                                                        </div>
+                                                    </div>              
+                                                </div>
+
+												<div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+													<div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Current_Tenant_Trading_Name__c.Label}"/></label>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Current_Tenant_Trading_Name__c}" styleclass="slds-form-element__static" />
+                                                        </div>
+												    </div>
+												</div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="Current Tenant Entity"/></label>
+                                                        <div class="slds-form-element__control">&nbsp;
+                                                            <apex:outputfield value="{!Unit__c.Current_Tenant__r.Tenant_Entity__c}" styleclass="slds-form-element__static" rendered="{!Unit__c.Current_Tenant__r != null && Unit__c.Current_Tenant__r.Tenant_CABID__c != defaultTenantCABId}"/>
+                                                        </div>
+                                                    </div>              
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Area_of_Premises__c.Label}"/></label>
+                                                        <div class="slds-form-element__control">&nbsp;
+                                                            <apex:outputfield value="{!Unit__c.Area_of_Premises__c}" styleclass="slds-form-element__static"/>
+                                                        </div>
+                                                    </div>              
+                                                </div>    
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}" style="height: 65px;">
+                                                        <apex:actionRegion >
+                                                            <apex:outputfield value="{!Unit__c.Is_Reconfig__c}" styleclass="slds-form-element__static" id="is_reconfig" rendered="{!!IsEdit}" style="margin-right: 10px;"/>
+                                                            <apex:inputfield value="{!Unit__c.Is_Reconfig__c}" styleclass="slds-form-element__label" id="is_reconfig_edt" rendered="{!IsEdit}" style="margin-right: 10px;">
+                                                                <apex:actionSupport event="onchange" rerender="recon_stage_panel" status="searchStatus" 
+                                                                                    onsubmit="showSpinner();" oncomplete="overridePageMessages(); setReadOnly(); hideSpinner(); " action="{!refreshFields}"/>
+                                                            </apex:inputfield>
+                                                            <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Is_Reconfig__c.Label}" for="is_reconfig_edt"/> 
+                                                        </apex:actionRegion>
+                                                        <apex:outputPanel id="recon_stage_panel"> 
+                                                            <apex:outputPanel rendered="{!Unit__c.Is_Reconfig__c}">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Reconfig_Stage__c.Label}" for="recon_stage_edt" rendered="false"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Reconfig_Stage__c}" styleclass="slds-form-element__static" id="recon_stage" rendered="{!!IsEdit}"/>
+                                                                    <apex:inputfield value="{!Unit__c.Reconfig_Stage__c}" styleclass="slds-input" id="recon_stage_edt" rendered="{!IsEdit}" />
+                                                                </div>
+                                                            </apex:outputPanel>   
+                                                        </apex:outputPanel>
+                                                    </div>   
+                                                    
+                                                </div>                                                
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.System_Unit_Category__c.Label}" for="System_Unit_Category__c"/> 
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.System_Unit_Category__c}" styleclass="slds-form-element__static" id="System_Unit_Category__c" />
+                                                            <apex:inputfield value="{!Unit__c.System_Unit_Category__c}" styleclass="slds-input" id="System_Unit_Category__edt" style="visibility: hidden; width: 1px;"/>
+                                                        </div>
+                                                    </div>
+                                                </div>                                                    
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Lease_Status__c.Label}" for="current_ten_lease_stat_edt"/> 
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Current_Tenant_Lease_Status__c}" styleclass="slds-form-element__static" id="current_ten_lease_stat"  rendered="{!!IsEdit}"/>
+                                                            <apex:inputfield value="{!Unit__c.Current_Tenant_Lease_Status__c}" styleclass="slds-input" id="current_ten_lease_stat_edt" rendered="{!IsEdit}" required="true"/>
+                                                        </div>
+                                                    </div>
+                                                </div>                                                
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Current_Tenant_Lease_Expiry_Date__c.Label}"/></label>
+                                                        <div class="slds-form-element__control">&nbsp;
+                                                            <apex:outputfield value="{!Unit__c.Current_Tenant_Lease_Expiry_Date__c}" styleclass="slds-form-element__static"/>
+                                                        </div>
+                                                    </div>              
+                                                </div>
+
+
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Budget_Current_Tenant_Rent_End__c.Label}"/></label>
+                                                        <div class="slds-form-element__control">&nbsp;
+                                                            <apex:outputfield value="{!Unit__c.Budget_Current_Tenant_Rent_End__c}" styleclass="slds-form-element__static"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Budget_Handover_Date__c.Label}"/></label>
+                                                        <div class="slds-form-element__control">&nbsp;
+                                                            <apex:outputfield value="{!Unit__c.Budget_Handover_Date__c}" styleclass="slds-form-element__static"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Budget_Future_Tenant_Rent_End__c.Label}"/></label>
+                                                        <div class="slds-form-element__control">&nbsp;
+                                                            <apex:outputfield value="{!Unit__c.Budget_Future_Tenant_Rent_End__c}" styleclass="slds-form-element__static"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Planned_End__c.Label}" for="cu_pl_end_edt"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Current_Tenant_Planned_End__c}" styleclass="slds-form-element__static" id="cu_pl_end" rendered="{!!IsEdit}"/>
+                                                            
+                                                            <apex:outputpanel rendered="{!IsEdit}" layout="none">
+                                                                <div class="slds-input-has-icon slds-input-has-icon--right">
+                                                                    <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                                                                        <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/utility-sprite/svg/symbols.svg#event')}"></use>
+                                                                    </svg> 
+                                                                    <apex:inputfield showDatePicker="false" style="" value="{!Unit__c.Current_Tenant_Planned_End__c}" styleclass="datefield slds-input" id="cu_pl_end_edt" />
+                                                                </div>
+                                                            </apex:outputpanel>                                          
+                                                        </div>
+                                                    </div>              
+                                                </div>                                                                                                                                                                                    
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        
+                                                        
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Estimated_Rent_Start__c.Label}" for="est_rent_start_edt"/> 
+                                                        
+                                                        <span class="tooltip slds-form-element" id="est_rent_start_infoicon">
+                                                            <span class="slds-form-element__icon slds-align-middle">
+                                                                <button class="slds-button slds-button slds-button--icon" aria-describedby="est_rent_start_info" title="{!$ObjectType.Unit__c.fields.Estimated_Rent_Start__c.inlineHelpText}">
+                                                                    <svg class="slds-button__icon" aria-hidden="true">
+                                                                        <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/utility-sprite/svg/symbols.svg#info')}"></use>
+                                                                    </svg>
+                                                                    <span class="slds-assistive-text">Info</span>
+                                                                </button>
+                                                            </span>
+                                                        </span>
+                                                        
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Estimated_Rent_Start__c}" styleclass="slds-form-element__static" id="est_rent_start" rendered="{!!IsEdit}"/>
+                                                            
+                                                            <apex:outputpanel rendered="{!IsEdit}" layout="none">
+                                                                <div class="slds-input-has-icon slds-input-has-icon--right">
+                                                                    <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                                                                        <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/utility-sprite/svg/symbols.svg#event')}"></use>
+                                                                    </svg> 
+                                                                    <apex:inputfield showDatePicker="false" style="" value="{!Unit__c.Estimated_Rent_Start__c}" styleclass="datefield slds-input" id="est_rent_start_edt"/>
+                                                                </div>
+                                                            </apex:outputpanel>        
+                                                        </div>
+                                                    </div>              
+                                                </div> 
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Estimated_Rent_End__c.Label}" for="est_rent_end_edt"/> 
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Estimated_Rent_End__c}" styleclass="slds-form-element__static" id="est_rent_end" rendered="{!!IsEdit}"/>
+                                                            
+                                                            <apex:outputpanel rendered="{!IsEdit}" layout="none">
+                                                                <div class="slds-input-has-icon slds-input-has-icon--right">
+                                                                    <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                                                                        <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/utility-sprite/svg/symbols.svg#event')}"></use>
+                                                                    </svg> 
+                                                                    <apex:inputfield showDatePicker="false" style="" value="{!Unit__c.Estimated_Rent_End__c}" styleclass="datefield slds-input" id="est_rent_end_edt" />
+                                                                </div>
+                                                            </apex:outputpanel>  
+                                                            
+                                                        </div>
+                                                    </div>              
+                                                </div>
+
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Estimated_Instruction_Date__c.Label}" for="est_instr_date_edt"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Estimated_Instruction_Date__c}" styleclass="slds-form-element__static" id="est_instr_date" rendered="{!!IsEdit}"/>
+
+                                                            <apex:outputpanel rendered="{!IsEdit}" layout="none">
+                                                                <div class="slds-input-has-icon slds-input-has-icon--right">
+                                                                    <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                                                                        <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/utility-sprite/svg/symbols.svg#event')}"></use>
+                                                                    </svg>
+                                                                    <apex:inputfield showDatePicker="false" style="" value="{!Unit__c.Estimated_Instruction_Date__c}" styleclass="datefield slds-input" id="est_instr_date_edt" />
+                                                                </div>
+                                                            </apex:outputpanel>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Current_Base_Rent_Amount__c.Label}"/></label>
+                                                        <div class="slds-form-element__control">&nbsp;
+                                                            <apex:outputfield value="{!Unit__c.Current_Base_Rent_Amount__c}" styleclass="slds-form-element__static"/>
+                                                        </div>
+                                                    </div>              
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <label class="slds-form-element__label">
+                                                            <apex:outputText value="{!$ObjectType.Unit__c.fields.Outgoings_Rates_Taxes_Amount_New__c.Label}"/></label>
+                                                        <div class="slds-form-element__control">&nbsp;
+                                                            <apex:outputfield value="{!Unit__c.Outgoings_Rates_Taxes_Amount_New__c}" styleclass="slds-form-element__static"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Gross_Rent_Ex_Promo_New__c.Label}" for="Current_Gross_Rent_Ex_Promo_New__c"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Current_Gross_Rent_Ex_Promo_New__c}" styleclass="slds-form-element__static" id="Current_Gross_Rent_Ex_Promo_New__c"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Occ_Cost_Ex_Promo_New__c.Label}" for="Current_Occ_Cost_Ex_Promo_New__c"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Current_Occ_Cost_Ex_Promo_New__c}" styleclass="slds-form-element__static" id="Current_Occ_Cost_Ex_Promo_New__c"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Budget_Gross_Rent_This_FY__c.Label}" for="Budget_Gross_Rent_This_FY__c"/> 
+                                                        <div class="slds-form-element__control">&nbsp;
+                                                            <apex:outputfield value="{!Unit__c.Budget_Gross_Rent_This_FY__c}" styleclass="slds-form-element__static" id="Budget_Gross_Rent_This_FY__c"/>
+                                                        </div>
+                                                    </div>              
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Budget_Gross_Rent_Ex_Promo_on_Expiry__c.Label}" for="Budget_Gross_Rent_Ex_Promo_on_Expiry__c"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Budget_Gross_Rent_Ex_Promo_on_Expiry__c}" styleclass="slds-form-element__static" id="Budget_Gross_Rent_Ex_Promo_on_Expiry__c"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Forecast_Base_Rent__c.Label}" for="fore_base"/> 
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Forecast_Base_Rent__c}" styleclass="slds-form-element__static" id="fore_base" rendered="{!!IsEdit}"/>
+                                                            <apex:inputfield value="{!Unit__c.Forecast_Base_Rent__c}" styleclass="slds-input currency" id="fore_base_edt" rendered="{!IsEdit}" />
+                                                            <!-- onkeydown="$(this).CurrencyField(event);" -->
+                                                        </div>
+                                                    </div>              
+                                                </div>
+ 												<div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Forecast_Occ_Cost_at_Expiry__c.Label}" for="Forecast_Occ_Cost_at_Expiry__c"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Forecast_Occ_Cost_at_Expiry__c}" styleclass="slds-form-element__static" id="Forecast_Occ_Cost_at_Expiry__c"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_MAT__c.Label}" for="Current_MAT__c"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Current_MAT__c}" styleclass="slds-form-element__static" id="Current_MAT__c"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Changes to reorder the new field - Naveen and Praveen 12-Jul--> 
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Proposed_MAT__c.Label}" for="Proposed_MAT__c_edt"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Proposed_MAT__c}" styleclass="slds-form-element__static" id="Proposed_MAT__c" rendered="{!!IsEdit}"/>
+                                                            <apex:inputfield value="{!Unit__c.Proposed_MAT__c}" styleclass="slds-input currency" id="Proposed_MAT__c_edt" rendered="{!IsEdit}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Forecast_Occ_Cost_at_Expiry_Replacement__c.Label}" for="Forecast_Occ_Cost_at_Expiry_Replacement__c"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Forecast_Occ_Cost_at_Expiry_Replacement__c}" styleclass="slds-form-element__static" id="Forecast_Occ_Cost_at_Expiry_Replacement__c"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Strategy_on_Expiry__c.Label}" for="Current_Tenant_Strategy_on_Expiry__c"/>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Current_Tenant_Strategy_on_Expiry__c}" styleclass="slds-form-element__static" id="Current_Tenant_Strategy_on_Expiry__c" rendered="{!!IsEdit}"/>
+                                                            <apex:inputfield value="{!Unit__c.Current_Tenant_Strategy_on_Expiry__c}" styleclass="slds-input" id="Current_Tenant_Strategy_on_Expiry__c_edt" rendered="{!IsEdit}"/>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!--<div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                    <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Strategy_on_Expiry__c.Label}" for="Current_Tenant_Strategy_on_Expiry__edt"/>
+                                                    <div class="slds-form-element__control">
+                                                        <apex:outputfield value="{!Unit__c.Current_Tenant_Strategy_on_Expiry__c}" styleclass="slds-form-element__static" id="Current_Tenant_Strategy_on_Expiry__c" rendered="{!!IsEdit}"/>
+                                                        <apex:inputfield value="{!Unit__c.Current_Tenant_Strategy_on_Expiry__c}" styleclass="slds-input" id="Current_Tenant_Strategy_on_Expiry__edt" rendered="{!IsEdit}" style="width: 98%"/>
+                                                    </div>
+                                                </div>-->
+
+
+                                                <!--<div class="slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-4">
+                                                    <div class="slds-form-element__control">
+                                                    </div>
+                                                </div>-->
+                                                <!--<apex:outputPanel rendered="{!Deal.Deal_Type__c =='New Tenant Standard' && Unit__c.Unit_Type__c != 'Automatic Teller Machines' && Unit__c.Unit_Type__c != 'Offices'}" layout="none">-->
+                                                    <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                        <div class="slds-form-element slds-has-divider--bottom">
+                                                            <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Fitout_Contribution_Budget__c.Label}" for="fit_con_bud"/> 
+                                                            <div class="slds-form-element__control">
+                                                                <apex:outputfield value="{!Unit__c.Fitout_Contribution_Budget__c}" styleclass="slds-form-element__static" id="fit_con_bud" />                                                </div>
+                                                        </div>              
+                                                    </div>
+                                                <!--</apex:outputPanel>-->
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Fitout_Contribution_Forecast__c.Label}" for="Fitout_Contribution_Forecast___edt"/> 
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Fitout_Contribution_Forecast__c}" styleclass="slds-form-element__static" id="Fitout_Contribution_Forecast__c" rendered="{!!IsEdit}"/>
+                                                            <apex:inputfield value="{!Unit__c.Fitout_Contribution_Forecast__c}" styleclass="slds-input currency" id="Fitout_Contribution_Forecast___edt" rendered="{!IsEdit}" />
+                                                        </div>
+                                                    </div>              
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element slds-has-divider--bottom">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Future_Tenant_Landlord_Works_Budget__c.Label}" for="fu_ten_land_work_bud"/> 
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Future_Tenant_Landlord_Works_Budget__c}" styleclass="slds-form-element__static" id="fu_ten_land_work_bud"/>
+                                                        </div>
+                                                    </div>              
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Landlord_Works_Forecast__c.Label}" for="Landlord_Works_Forecast__c_edt"/> 
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Landlord_Works_Forecast__c}" styleclass="slds-form-element__static" id="Landlord_Works_Forecast__c" rendered="{!!IsEdit}"/>
+                                                            <apex:inputfield value="{!Unit__c.Landlord_Works_Forecast__c}" styleclass="slds-input currency" id="Landlord_Works_Forecast__c_edt" rendered="{!IsEdit}" />
+                                                        </div>
+                                                    </div>              
+                                                </div>
+                                                <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                    <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Preferred_Tenant__c.Label}" for="pref_tent"/> 
+                                                        <div class="slds-form-element__control">
+                                                            <apex:outputfield value="{!Unit__c.Preferred_Tenant__c}" styleclass="slds-form-element__static" id="pref_tent" rendered="{!!IsEdit}"/>
+                                                            <apex:actionRegion >
+                                                                <apex:selectList rendered="{!IsEdit}" multiselect="false" size="1" value="{!Unit__c.Preferred_Tenant__c}" styleclass="slds-input" id="opp_for_search">
+                                                                    <apex:actionSupport action="{!SetDeal}" event="onchange" rerender="tabsPanel, messages, messagePanel, tab3outer" 
+                                                                                        onsubmit="showSpinner();" oncomplete="hideSpinner(); overridePageMessages(); setReadOnly(); "/>
+                                                                    <apex:selectOptions value="{!OpportunitiesForSearch}"/>
+                                                                </apex:selectList>
+                                                            </apex:actionRegion>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <apex:outputPanel layout="none">
+                                                    <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                        <div class="slds-form-element slds-has-divider--bottom">
+                                                            <apex:outputLabel styleClass="slds-form-element__label" value="Unit Owner" for="owner_edt"/> 
+                                                            <div class="slds-form-element__control">
+                                                                <apex:outputfield value="{!Unit__c.OwnerId}" styleclass="slds-form-element__static" id="owner" rendered="{!!IsEdit}"/>
+                                                                <apex:inputfield value="{!Unit__c.OwnerId}" styleclass="slds-input" id="owner_edt" rendered="{!IsEdit}" style="width: 90%;"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                        <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                            <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Unit_Comments__c.Label}" for="Unit_Comments__c_edt"/> 
+                                                            <div class="slds-form-element__control">
+                                                                <apex:outputfield value="{!Unit__c.Unit_Comments__c}" styleclass="slds-form-element__static" id="Unit_Comments__c" rendered="{!!IsEdit}">&nbsp;
+                                                                </apex:outputfield>
+                                                                <apex:inputfield value="{!Unit__c.Unit_Comments__c}" styleclass="slds-input currency" id="Unit_Comments__c_edt" rendered="{!IsEdit}" />
+                                                            </div>
+                                                        </div>              
+                                                    </div>
+                                                    <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4">
+                                                        <div class="slds-form-element {!IF(!IsEdit, 'slds-has-divider--bottom', '')}">
+                                                            <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.VSI_Value_Flag__c.Label}" for="VSI_Value_Flag__c_edt"/>
+                                                            <div class="slds-form-element__control">
+                                                                <apex:outputfield value="{!Unit__c.VSI_Value_Flag__c}" styleclass="slds-form-element__static" id="VSI_Value_Flag__c"  rendered="{!!IsEdit}"/>
+                                                                <apex:inputfield value="{!Unit__c.VSI_Value_Flag__c}" styleclass="slds-input" id="VSI_Value_Flag__c_edt" rendered="{!IsEdit}" required="true"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </apex:outputPanel>
+
+
+
+
+
+
+
+
+
+
+
+
+                                            </div>
+                                        </div>
+                                    </apex:outputPanel>
+                                    <div class="slds-card__footer">
+                                        
+                                    </div> 
+                                </article>
+                            </div>
+                            
+                            <div class="slds-tabs--scoped">
+                                
+                                <!-- TABS -->
+                                <!-- Commented the below out as Mike/Maria no longer wanted to display the panels and this heading was still appearing. -->
+                               <!-- <apex:outputpanel layout="inline" id="tabsPanel">
+                                    <ul class="slds-tabs&#45;&#45;scoped__nav" role="tablist">
+                                        <apex:outputpanel layout="none" rendered="{!Unit__c.Preferred_Tenant__c != null}"><li class="slds-tabs&#45;&#45;scoped__item slds-text-heading&#45;&#45;label" role="presentation"><a class="slds-tabs&#45;&#45;scoped__link" href="#void" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-scoped-3" id="tab-scoped-3__item" onclick="selectTab(this);">Future Tenant</a></li></apex:outputpanel>
+                                    </ul>
+                                </apex:outputpanel>-->
+                                <!-- TAB 1 --> 
+                                
+                                <div id="tab-default-1" class="slds-tabs--scoped__content slds-hide" role="tabpanel" aria-labelledby="tab-scoped-1__item">
+                                    <apex:outputpanel id="tab1">
+                                        <article class="slds-card">
+                                            <div class="slds-card__header slds-grid">
+                                                <header class="slds-media slds-media--center slds-has-flexi-truncate">
+                                                    <div class="slds-media__figure">
+                                                        <svg aria-hidden="true" class="slds-icon slds-icon-standard-account slds-icon--small">
+                                                            
+                                                            <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/standard-sprite/svg/symbols.svg#investment_account')}"></use>
+                                                        </svg> 
+                                                    </div>
+                                                    <div class="slds-media__body slds-truncate">
+                                                        <h2>
+                                                            <a href="javascript:void(0);" class="slds-text-link--reset">
+                                                                <span class="slds-text-heading--small">Financial Information</span>
+                                                            </a>
+                                                        </h2>
+                                                    </div>
+                                                </header>
+                                            </div>
+                                            
+                                            <div class="slds-card__body">
+                                                <div class="slds-panel__section">
+                                                    <div class="slds-form--horizontal">
+                                                        <div class="slds-grid slds-wrap slds-grid--pull-padded">
+                                                            
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Budget_Base_Rent_on_Expiry__c.Label}" for="budget_base_rent_exp"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Budget_Base_Rent_on_Expiry__c}" styleclass="slds-form-element__static" id="budget_base_rent_exp"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Sept_Forecast_Base_Rent__c.Label}" for="sept_forc_base_rent"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Sept_Forecast_Base_Rent__c}" styleclass="slds-form-element__static" id="sept_forc_base_rent"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Fin_Estimated_Rent_Start__c.Label}" for="fin_est_rent_start"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Fin_Estimated_Rent_Start__c}" styleclass="slds-form-element__static" id="fin_est_rent_start"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Fin_Estimated_Rent_End__c.Label}" for="fin_est_rent_end"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Fin_Estimated_Rent_End__c}" styleclass="slds-form-element__static" id="fin_est_rent_end"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Budget_Base_Rent_This_FY_Sqm__c.Label}" for="bud_base_rent_fy_sqm"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Budget_Base_Rent_This_FY_Sqm__c}" styleclass="slds-form-element__static" id="bud_base_rent_fy_sqm"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Financial_Forecast_Base_Rent__c.Label}" for="fin_forec_base_rent"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Financial_Forecast_Base_Rent__c}" styleclass="slds-form-element__static" id="fin_forec_base_rent"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Forecast_Base_Rent_Sqm__c.Label}" for="forec_base_rent_sqm"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Forecast_Base_Rent_Sqm__c}" styleclass="slds-form-element__static" id="forec_base_rent_sqm"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div> 
+                                            </div>
+                                            <div class="slds-card__footer"></div>
+                                        </article>
+                                        
+                                        <!--  -->
+                                        
+                                        <article class="slds-card">
+                                            <div class="slds-card__header slds-grid">
+                                                <header class="slds-media slds-media--center slds-has-flexi-truncate">
+                                                    <div class="slds-media__figure">
+                                                        <svg aria-hidden="true" class="slds-icon slds-icon-standard-account slds-icon--small">
+                                                            
+                                                            <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/standard-sprite/svg/symbols.svg#opportunity')}"></use>
+                                                        </svg> 
+                                                    </div>
+                                                    <div class="slds-media__body slds-truncate">
+                                                        <h2>
+                                                            <a href="javascript:void(0);" class="slds-text-link--reset">
+                                                                <span class="slds-text-heading--small">Precinct Information</span>
+                                                            </a>
+                                                        </h2>
+                                                    </div>
+                                                </header>
+                                            </div>
+                                            
+                                            <div class="slds-card__body">
+                                                <div class="slds-panel__section">
+                                                    <div class="slds-form--horizontal">
+                                                        <div class="slds-grid slds-wrap slds-grid--pull-padded">
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.No_of_Tenants_in_Precinct__c.Label}" for="no_ten_preci"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.No_of_Tenants_in_Precinct__c}" styleclass="slds-form-element__static" id="no_ten_preci"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Precinct_MAT_sqm__c.Label}" for="pre_mat_sqm"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Precinct_MAT_sqm__c}" styleclass="slds-form-element__static" id="pre_mat_sqm"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Precinct_Avg_Base_Rent__c.Label}" for="pre_avg_rent"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Precinct_Avg_Base_Rent__c}" styleclass="slds-form-element__static" id="pre_avg_rent"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Precinct_Avg_Base_Rent_Sqm__c.Label}" for="pre_avg_base_rent_sqm"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Precinct_Avg_Base_Rent_Sqm__c}" styleclass="slds-form-element__static" id="pre_avg_base_rent_sqm"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Precinct_Avg_Gross_Rent__c.Label}" for="pre_avg_gross_rent"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Precinct_Avg_Gross_Rent__c}" styleclass="slds-form-element__static" id="pre_avg_gross_rent"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Precinct_Avg_Gross_Rent_Sqm__c.Label}" for="pre_avg_gross_rent_sqm"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Precinct_Avg_Gross_Rent_Sqm__c}" styleclass="slds-form-element__static" id="pre_avg_gross_rent_sqm"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div> 
+                                            <div class="slds-card__footer"></div>
+                                        </article>
+                                    </apex:outputpanel>
+                                </div>
+                                
+                                <!-- TAB 1a -->
+                                
+                                <div id="tab-default-1a" class="slds-tabs--scoped__content slds-hide" role="tabpanel" aria-labelledby="tab-scoped-1a__item">
+                                    <apex:outputpanel id="tab1a">
+                                        <article class="slds-card">
+                                            <div class="slds-card__body">
+                                                <div class="slds-panel__section">
+                                                    <div class="slds-form--horizontal">
+                                                        <div class="slds-grid slds-wrap slds-grid--pull-padded">
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Planned_Strategy_on_Expiry__c.Label}" for="Planned_Strategy_on_Expiry__c_edit"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Planned_Strategy_on_Expiry__c}" styleclass="slds-form-element__static" id="Planned_Strategy_on_Expiry__c"/>                                              </div>
+                                                            </div>
+
+                                                            <!-- This field has been moved onto the actual Unit page now - Stuart Donnachie - VPDS-90 - 31/08/2018 -->
+                                                            <!--<div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Strategy_on_Expiry__c.Label}" for="Current_Tenant_Strategy_on_Expiry__edt"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Strategy_on_Expiry__c}" styleclass="slds-form-element__static" id="Current_Tenant_Strategy_on_Expiry__c" rendered="{!!IsEdit}"/>
+                                                                    <apex:inputfield value="{!Unit__c.Current_Tenant_Strategy_on_Expiry__c}" styleclass="slds-input" id="Current_Tenant_Strategy_on_Expiry__edt" rendered="{!IsEdit}" style="width: 98%"/>
+                                                                </div>
+                                                            </div>-->
+                                                            
+                                                            
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Target_Base_Rent__c.Label}" for="Target_Base_Rent__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Target_Base_Rent__c}" styleclass="slds-form-element__static" id="Target_Base_Rent__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="Current Tenant Classification From Strategy" for="Current_Tenant_Classification_Strategy__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Classification_Strategy__c}" styleclass="slds-form-element__static" id="Current_Tenant_Classification_Strategy__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Classification__c.Label}" for="Current_Tenant_Classification__edt"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Classification__c}" styleclass="slds-form-element__static" id="Current_Tenant_Classification__c" rendered="{!!IsEdit}"/>
+                                                                    <apex:inputfield value="{!Unit__c.Current_Tenant_Classification__c}" styleclass="slds-input" id="Current_Tenant_Classification__edt" rendered="{!IsEdit}"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div> 
+                                            </div>
+                                            <div class="slds-card__footer"></div>
+                                        </article>
+                                        
+                                        <!--  -->
+                                    </apex:outputpanel>
+                                </div>
+                                
+                                
+                                <!-- TAB 2 -->
+                                
+                                <div id="tab-default-2" class="slds-tabs--scoped__content slds-hide" role="tabpanel" aria-labelledby="tab-scoped-2__item">
+                                    <apex:outputpanel id="tab2">
+                                        <article class="slds-card">
+                                            <div class="slds-card__header slds-grid">
+                                                <header class="slds-media slds-media--center slds-has-flexi-truncate">
+                                                    <div class="slds-media__figure">
+                                                        <svg aria-hidden="true" class="slds-icon slds-icon-standard-contact slds-icon--small">
+                                                            
+                                                            <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/standard-sprite/svg/symbols.svg#people')}"></use>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="slds-media__body slds-truncate">
+                                                        <h2>
+                                                            <a href="javascript:void(0);" class="slds-text-link--reset">
+                                                                <span class="slds-text-heading--small">Tenant Information</span>
+                                                            </a>
+                                                        </h2>
+                                                    </div>
+                                                </header>
+                                            </div>
+                                            <div class="slds-card__body">
+                                                <div class="slds-panel__section">
+                                                    <div class="slds-form--horizontal">
+                                                        <div class="slds-grid slds-wrap slds-grid--pull-padded">
+
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Group__c.Label}" for="Current_Tenant_Group__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Group__c}" styleclass="slds-form-element__static" id="Current_Tenant_Group__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Lease_Number__c.Label}" for="Lease_Number__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Lease_Number__c}" styleclass="slds-form-element__static" id="Lease_Number__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_CAB_ID__c.Label}" for="Current_Tenant_CAB_ID__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_CAB_ID__c}" styleclass="slds-form-element__static" id="Current_Tenant_CAB_ID__c"/>
+                                                                </div> 
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Retailer_Category__c.Label}" for="Current_Tenant_Retailer_Category__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Retailer_Category__c}" styleclass="slds-form-element__static" id="Current_Tenant_Retailer_Category__c"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="slds-card__footer"></div>
+                                        </article>
+                                        <!--  -->
+                                        <article class="slds-card">
+                                            <div class="slds-card__header slds-grid">
+                                                <header class="slds-media slds-media--center slds-has-flexi-truncate">
+                                                    <div class="slds-media__figure">
+                                                        <svg aria-hidden="true" class="slds-icon slds-icon-standard-contact slds-icon--small">
+                                                            
+                                                            <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/standard-sprite/svg/symbols.svg#contract')}"></use>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="slds-media__body slds-truncate">
+                                                        <h2>
+                                                            <a href="javascript:void(0);" class="slds-text-link--reset">
+                                                                <span class="slds-text-heading--small">Deal Information</span>
+                                                            </a>
+                                                        </h2>
+                                                    </div>
+                                                </header>
+                                            </div>
+                                            <div class="slds-card__body">
+                                                <div class="slds-panel__section">
+                                                    <div class="slds-form--horizontal">
+                                                        <div class="slds-grid slds-wrap slds-grid--pull-padded">
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Lease_Start_Date__c.Label}" for="Current_Tenant_Lease_Start_Date__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Lease_Start_Date__c}" styleclass="slds-form-element__static" id="Current_Tenant_Lease_Start_Date__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Lease_Expiry_Date__c.Label}" for="Current_Tenant_Lease_Expiry_Date__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Lease_Expiry_Date__c}" styleclass="slds-form-element__static" id="Current_Tenant_Lease_Expiry_Date__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Lease_Term__c.Label}" for="Current_Tenant_Lease_Term__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Lease_Term__c}" styleclass="slds-form-element__static" id="Current_Tenant_Lease_Term__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Lease_Term_Remaining__c.Label}" for="Current_Tenant_Lease_Term_Remaining__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Lease_Term_Remaining__c}" styleclass="slds-form-element__static" id="Current_Tenant_Lease_Term_Remaining__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Vacate_Date__c.Label}" for="Current_Tenant_Vacate_Date__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Vacate_Date__c}" styleclass="slds-form-element__static" id="Current_Tenant_Vacate_Date__c"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="slds-card__footer"></div>
+                                        </article>
+                                        <!--  -->
+                                        <article class="slds-card">
+                                            <div class="slds-card__header slds-grid">
+                                                <header class="slds-media slds-media--center slds-has-flexi-truncate">
+                                                    <div class="slds-media__figure">
+                                                        <svg aria-hidden="true" class="slds-icon slds-icon-standard-contact slds-icon--small">
+                                                            
+                                                            <use xlink:href="{!URLFOR($Resource.SalesforceLighteningDesignSystem, '/assets/icons/standard-sprite/svg/symbols.svg#quotes')}"></use>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="slds-media__body slds-truncate">
+                                                        <h2>
+                                                            <a href="javascript:void(0);" class="slds-text-link--reset">
+                                                                <span class="slds-text-heading--small">Commercial Information</span>
+                                                            </a>
+                                                        </h2>
+                                                    </div>
+                                                </header>
+                                            </div>
+                                            <div class="slds-card__body">
+                                                <div class="slds-panel__section">
+                                                    <div class="slds-form--horizontal">
+                                                        <div class="slds-grid slds-wrap slds-grid--pull-padded">
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Recovery_Deal_Type__c.Label}" for="Current_Tenant_Recovery_Deal_Type__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Recovery_Deal_Type__c}" styleclass="slds-form-element__static" id="Current_Tenant_Recovery_Deal_Type__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Base_Rent_Amount__c.Label}" for="Current_Base_Rent_Amount__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Base_Rent_Amount__c}" styleclass="slds-form-element__static" id="Current_Base_Rent_Amount__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Outgoings__c.Label}" for="Current_Tenant_Outgoings__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Outgoings__c}" styleclass="slds-form-element__static" id="Current_Tenant_Outgoings__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Recoveries__c.Label}" for="Current_Tenant_Recoveries__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Recoveries__c}" styleclass="slds-form-element__static" id="Current_Tenant_Recoveries__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Percentage_Rent_Threshold__c.Label}" for="Current_Tenant_Percentage_Rent_Threshold__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Percentage_Rent_Threshold__c}" styleclass="slds-form-element__static" id="Current_Tenant_Percentage_Rent_Threshold__c"/>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Loss_of_Rent__c.Label}" for="Loss_of_Rent__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Loss_of_Rent__c}" styleclass="slds-form-element__static" id="Loss_of_Rent__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Last_Statement_Date__c.Label}" for="Last_Statement_Date__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Last_Statement_Date__c}" styleclass="slds-form-element__static" id="Last_Statement_Date__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Debt__c.Label}" for="Current_Debt__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Debt__c}" styleclass="slds-form-element__static" id="Current_Debt__c"/>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Current_Tenant_Sales_Category__c.Label}" for="Current_Tenant_Sales_Category__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Current_Tenant_Sales_Category__c}" styleclass="slds-form-element__static" id="Current_Tenant_Sales_Category__c"/>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.No_Of_Tenants_in_Sales_Category__c.Label}" for="No_Of_Tenants_in_Sales_Category__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.No_Of_Tenants_in_Sales_Category__c}" styleclass="slds-form-element__static" id="No_Of_Tenants_in_Sales_Category__c"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="slds-form-element slds-has-divider--bottom slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                                                                <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Unit__c.fields.Sales_Category_MAT_sqm__c.Label}" for="Sales_Category_MAT_sqm__c"/> 
+                                                                <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Unit__c.Sales_Category_MAT_sqm__c}" styleclass="slds-form-element__static" id="Sales_Category_MAT_sqm__c"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="slds-card__footer"></div>
+                                        </article>
+                                        <!--  -->
+                                        
+                                    </apex:outputpanel>
+                                </div>
+                                
+
+                                <!-- TAB 3 - Holds Tenant/Deal Information/Monetary Contributions Panels -->
+                               <!-- <apex:outputPanel id="tab3outer">
+                                    <div id="tab-default-3" class="slds-tabs&#45;&#45;scoped__content {!IF(Unit__c.Preferred_Tenant__c != null, 'slds-show','slds-hide')}" role="tabpanel" aria-labelledby="tab-scoped-3__item">
+                                        <apex:outputpanel id="tab3">
+                                            &lt;!&ndash; Tenant Information Panel &ndash;&gt;
+                                            <article class="slds-card">
+                                                <div class="slds-card__header slds-grid">
+                                                    <header class="slds-media slds-media&#45;&#45;center slds-has-flexi-truncate">
+                                                        <div class="slds-media__figure">
+                                                            <apex:image value="{!URLFOR($Resource.icons, 'contact_purple.png')}"/>
+                                                            
+                                                        </div>
+                                                        <div class="slds-media__body slds-truncate">
+                                                            <h2>
+                                                                <a href="javascript:void(0);" class="slds-text-link&#45;&#45;reset">
+                                                                    <span class="slds-text-heading&#45;&#45;small">Tenant Information</span>
+                                                                </a>
+                                                            </h2>
+                                                        </div>
+                                                    </header>
+                                                </div>
+                                                <div class="slds-card__body">
+                                                    
+                                                    <apex:outputpanel id="tab3Sub1">
+                                                        <div class="slds-panel__section">
+                                                            <div class="slds-form&#45;&#45;horizontal">
+                                                                <div class="slds-grid slds-wrap slds-grid&#45;&#45;pull-padded">
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel rendered="{!Deal.AccountId != null && Deal.Account.Tenant_CABID__c != defaultTenantCABId}" styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.AccountId.Label}" for="AccountId"/> 
+                                                                        <apex:outputLabel rendered="{!Deal.AccountId == null || Deal.Account.Tenant_CABID__c == defaultTenantCABId}" styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.New_Trading_Name__c.Label}" for="New_Trading_Name__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield rendered="{!Deal.AccountId != null && Deal.Account.Tenant_CABID__c != defaultTenantCABId}" value="{!Deal.AccountId}" styleclass="slds-form-element__static" id="AccountId"/>
+                                                                            <apex:outputfield rendered="{!Deal.AccountId == null || Deal.Account.Tenant_CABID__c == defaultTenantCABId}" value="{!Deal.New_Trading_Name__c}" styleclass="slds-form-element__static" id="New_Trading_Name__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel rendered="{!Deal.AccountId != null && Deal.Account.Tenant_CABID__c != defaultTenantCABId}" styleClass="slds-form-element__label" value="{!$ObjectType.Account.fields.Tenant_Entity__c.Label}" for="Tenant_Entity__c"/> 
+                                                                        <apex:outputLabel rendered="{!Deal.AccountId == null || Deal.Account.Tenant_CABID__c == defaultTenantCABId}" styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.New_Tenant_Entity__c.Label}" for="New_ity__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield rendered="{!Deal.AccountId != null && Deal.Account.Tenant_CABID__c != defaultTenantCABId}" value="{!Deal.Account.Tenant_Entity__c}" styleclass="slds-form-element__static" id="Tenant_Entity__c"/>
+                                                                            <apex:outputfield rendered="{!Deal.AccountId == null || Deal.Account.Tenant_CABID__c == defaultTenantCABId}" value="{!Deal.New_Tenant_Entity__c}" styleclass="slds-form-element__static" id="New_Tenant_Entity__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Tenant_Category__c.Label}" for="Tenant_Category__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Tenant_Category__c}" styleclass="slds-form-element__static" id="Tenant_Category__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Tenant_Classification__c.Label}" for="Tenant_Classification__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Tenant_Classification__c}" styleclass="slds-form-element__static" id="Tenant_Classification__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Year_1_Sales_Estimate__c.Label}" for="Year_1_Sales_Estimate__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Year_1_Sales_Estimate__c}" styleclass="slds-form-element__static" id="Year_1_Sales_Estimate__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </apex:outputpanel>
+                                                </div>
+                                                <div class="slds-card__footer"></div>
+                                            </article>
+                                            &lt;!&ndash; Deal Information Panel &ndash;&gt;
+                                            <article class="slds-card">
+                                                <div class="slds-card__header slds-grid">
+                                                    <header class="slds-media slds-media&#45;&#45;center slds-has-flexi-truncate">
+                                                        <div class="slds-media__figure">
+                                                            <apex:image value="{!URLFOR($Resource.icons, 'contact_purple.png')}"/>
+                                                        </div>
+                                                        <div class="slds-media__body slds-truncate">
+                                                            <h2>
+                                                                <a href="javascript:void(0);" class="slds-text-link&#45;&#45;reset">
+                                                                    <span class="slds-text-heading&#45;&#45;small">Deal Information</span>
+                                                                </a>
+                                                            </h2>
+                                                        </div>
+                                                    </header>
+                                                </div>
+                                                <div class="slds-card__body">
+                                                    
+                                                    <apex:outputpanel id="tab3Sub2">
+                                                        <div class="slds-panel__section">
+                                                            <div class="slds-form&#45;&#45;horizontal">
+                                                                <div class="slds-grid slds-wrap slds-grid&#45;&#45;pull-padded">
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Deal_Type__c.Label}" for="Deal_Type__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Deal_Type__c}" styleclass="slds-form-element__static" id="Deal_Type__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Recovery_Type__c.Label}" for="Recovery_Type__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Recovery_Type__c}" styleclass="slds-form-element__static" id="Recovery_Type__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <apex:outputPanel rendered="{!Deal.Deal_Type__c =='New Tenant Standard' && Unit__c.Unit_Type__c != 'Automatic Teller Machines' && Unit__c.Unit_Type__c != 'Offices'}" layout="none">
+                                                                        <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                            <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Fit_out_Period__c.Label}" for="Fit_out_Period__c"/> 
+                                                                            <div class="slds-form-element__control">
+                                                                                <apex:outputfield value="{!Deal.Fit_out_Period__c}" styleclass="slds-form-element__static" id="Fit_out_Period__c"/>
+                                                                            </div>
+                                                                        </div>
+                                                                    </apex:outputPanel>
+                                                                    &lt;!&ndash;
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                    <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Future_Tenant_Rent_Commencement_Date__c.Label}" for="Future_Tenant_Rent_Commencement_Date__c"/> 
+                                                                    <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Deal.Future_Tenant_Rent_Commencement_Date__c}" styleclass="slds-form-element__static" id="Future_Tenant_Rent_Commencement_Date__c"/>
+                                                                    </div>
+                                                                    </div>
+                                                                    &ndash;&gt;
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Base_Rent__c.Label}" for="Base_Rent__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Base_Rent__c}" styleclass="slds-form-element__static" id="Base_Rent__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Artificial_Threshold_Amount__c.Label}" for="Artificial_Threshold_Amount__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Artificial_Threshold_Amount__c}" styleclass="slds-form-element__static" id="Artificial_Threshold_Amount__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    &lt;!&ndash;
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                    <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Deal_Justification__c.Label}" for="Deal_Justification__c"/> 
+                                                                    <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Deal.Deal_Justification__c}" styleclass="slds-form-element__static" id="Deal_Justification__c"/>
+                                                                    </div>
+                                                                    </div>
+                                                                    &ndash;&gt;
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Percentage_Rent_Rate__c.Label}" for="Percentage_Rent_Rate__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Percentage_Rent_Rate__c}" styleclass="slds-form-element__static" id="Percentage_Rent_Rate__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Percentage_Rent_Threshold__c.Label}" for="Percentage_Rent_Threshold__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Percentage_Rent_Threshold__c}" styleclass="slds-form-element__static" id="Percentage_Rent_Threshold__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Promo_Review_Rate_and_Type__c.Label}" for="Promo_Review_Rate_and_Type__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Promo_Review_Rate_and_Type__c}" styleclass="slds-form-element__static" id="Promo_Review_Rate_and_Type__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Promo_ReviewRate__c.Label}" for="Promo_ReviewRate__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Promo_ReviewRate__c}" styleclass="slds-form-element__static" id="Promo_ReviewRate__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Rent_Review_Percentage__c.Label}" for="Rent_Review_Percentage__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Rent_Review_Percentage__c}" styleclass="slds-form-element__static" id="Rent_Review_Percentage__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Rent_Review_Rate_And_Type__c.Label}" for="Rent_Review_Rate_And_Type__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Rent_Review_Rate_And_Type__c}" styleclass="slds-form-element__static" id="Rent_Review_Rate_And_Type__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </apex:outputpanel>
+                                                </div>
+                                                <div class="slds-card__footer"></div>
+                                            </article>
+                                            &lt;!&ndash;  Monetary Contributions Panel &ndash;&gt;
+                                            <article class="slds-card">
+                                                <div class="slds-card__header slds-grid">
+                                                    <header class="slds-media slds-media&#45;&#45;center slds-has-flexi-truncate">
+                                                        <div class="slds-media__figure">
+                                                            <apex:image value="{!URLFOR($Resource.icons, 'contact_purple.png')}"/>
+                                                        </div>
+                                                        <div class="slds-media__body slds-truncate">
+                                                            <h2>
+                                                                <a href="javascript:void(0);" class="slds-text-link&#45;&#45;reset">
+                                                                    <span class="slds-text-heading&#45;&#45;small">Monetary Contributions</span>
+                                                                </a>
+                                                            </h2>
+                                                        </div>
+                                                    </header>
+                                                </div>
+                                                <div class="slds-card__body">
+                                                    
+                                                    <apex:outputpanel id="tab3Sub3">
+                                                        <div class="slds-panel__section">
+                                                            <div class="slds-form&#45;&#45;horizontal">
+                                                                <div class="slds-grid slds-wrap slds-grid&#45;&#45;pull-padded">
+                                                                    <apex:outputPanel rendered="{!Deal.Deal_Type__c =='New Tenant Standard' && Unit__c.Unit_Type__c != 'Automatic Teller Machines' && Unit__c.Unit_Type__c != 'Offices'}" layout="none">
+                                                                        <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                            <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Fitout_Contribution_Amount__c.Label}" for="Fitout_Contribution_Amount__c"/> 
+                                                                            <div class="slds-form-element__control">
+                                                                                <apex:outputfield value="{!Deal.Fitout_Contribution_Amount__c}" styleclass="slds-form-element__static" id="Fitout_Contribution_Amount__c"/>
+                                                                            </div>
+                                                                        </div>
+                                                                    </apex:outputPanel>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Refurbishment_Contribution__c.Label}" for="Refurbishment_Contribution__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Refurbishment_Contribution__c}" styleclass="slds-form-element__static" id="Refurbishment_Contribution__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Refurbishment_Contribution_Amount__c.Label}" for="Refurbishment_Contribution_Amount__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Refurbishment_Contribution_Amount__c}" styleclass="slds-form-element__static" id="Refurbishment_Contribution_Amount__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Lease_Incentive_Days__c.Label}" for="Lease_Incentive_Days__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Lease_Incentive_Days__c}" styleclass="slds-form-element__static" id="Lease_Incentive_Days__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Lease_Incentive_Amount__c.Label}" for="Lease_Incentive_Amount__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Lease_Incentive_Amount__c}" styleclass="slds-form-element__static" id="Lease_Incentive_Amount__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    &lt;!&ndash;
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                    <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Future_Tenant_Landlord_Works_Estimate__c.Label}" for="Future_Tenant_Landlord_Works_Estimate__c"/> 
+                                                                    <div class="slds-form-element__control">
+                                                                    <apex:outputfield value="{!Deal.Future_Tenant_Landlord_Works_Estimate__c}" styleclass="slds-form-element__static" id="Future_Tenant_Landlord_Works_Estimate__c"/>
+                                                                    </div>
+                                                                    </div>
+                                                                    &ndash;&gt;
+                                                                    <div class="slds-form-element slds-has-divider&#45;&#45;bottom slds-p-horizontal&#45;&#45;small slds-size&#45;&#45;1-of-1 slds-medium-size&#45;&#45;1-of-2 slds-large-size&#45;&#45;1-of-2">
+                                                                        <apex:outputLabel styleClass="slds-form-element__label" value="{!$ObjectType.Opportunity.fields.Promotion_Contribution_Percent__c.Label}" for="Promotion_Contribution_Percent__c"/> 
+                                                                        <div class="slds-form-element__control">
+                                                                            <apex:outputfield value="{!Deal.Promotion_Contribution_Percent__c}" styleclass="slds-form-element__static" id="Promotion_Contribution_Percent__c"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </apex:outputpanel>
+                                                </div>
+                                                <div class="slds-card__footer"></div>
+                                            </article>
+                                        </apex:outputpanel>
+                                    </div>
+                                </apex:outputPanel>-->
+                                <div class="slds-button-group slds-float--right" role="group"  style="padding: 15px;"> 
+                                    <apex:commandButton value="Edit" styleclass="slds-button slds-button--neutral" action="{!customEdit}" immediate="true" rendered="{!!IsEdit}" onclick="showSpinner();" oncomplete="hideSpinner();"/>
+                                    <apex:commandButton value="Save" styleclass="slds-button slds-button--neutral" action="{!customSave}" rendered="{!IsEdit}" />
+                                </div>
+                                <div style="clear: both;">
+                                </div>
+                            </div>
+                        </apex:outputPanel>
+                    </apex:outputPanel>    
+                    <div class="slds-spinner_container slds-hide" style="position: fixed !important;">
+                        <div role="status" class="slds-spinner slds-spinner--medium slds-spinner--brand">
+                            <span class="slds-assistive-text">Loading</span>
+                            <div class="slds-spinner__dot-a"></div>
+                            <div class="slds-spinner__dot-b"></div>
+                        </div>
+                    </div> 
+                </div>
+
+                <!-- Below added to allow the Building State field value to be visible within the controller after using the stdController.getRecord() method. If the field does not exist on the page then it is not accessible in the controller -->
+                <apex:outputfield value="{!Unit__c.Building__r.State__c}" styleclass="slds-form-element__static" rendered="false"/>
+                <apex:outputfield value="{!Unit__c.Building__r.Business_Unit__c}" styleclass="slds-form-element__static" rendered="false"/>
+                <apex:outputfield value="{!Unit__c.Building__r.Centre__r.Name}" styleclass="slds-form-element__static" rendered="false"/>
+
+
+
+
+            </apex:form>
+        </body>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.css"/>
+            <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.js"></script>
+        <apex:actionStatus id="ShowStatus" onstart="showSpinner()" onstop="hideSpinner()"/> 
+            <script src="{!URLFOR($Resource.aljs, '/jquery.aljs-init.min.js')}"></script>
+        <script src="{!URLFOR($Resource.aljs, '/jquery.aljs-datepicker.min.js')}"></script>
+        <script src="{!$Resource.autoNumeric}"></script>
+        <script>
+        $(document).ready(function() { 
+            $('.currency').autoNumeric("init", {
+                aSep: ',',
+                aDec: '.',
+                aForm: false
+            });
+        });
+        
+        function setReadOnly() {
+            $('.readonly').each(function(i){               
+                element = $(document.getElementById(this.id)); 
+                element.attr('readOnly', true); 
+                element.css({'background-color' : '#e0e5ee'});
+                element.css({'border-color' : '#a8b7c7'});
+                element.attr('title','Read Only');
+            });
+        }
+        
+        
+        $( document ).ready(function() {
+            setReadOnly();
+            //overridePageMessages();
+        });
+        
+        $( function() {
+            $( '.tooltip' ).tooltip();
+        } );
+        
+        
+        function selectTab(elmnt) {
+            // slds-active
+            $(elmnt).parent("li").siblings(".slds-active").removeClass("slds-active");
+            $(elmnt).parent("li").addClass("slds-active");
+            
+            // tabindex
+            $(elmnt).parent("li").siblings().children("a").attr("tabindex", -1);
+            $(elmnt).attr("tabindex", 0);
+            
+            // aria-selected
+            $(elmnt).parent("li").siblings().children("a").attr("aria-selected", false);
+            $(elmnt).attr("aria-selected", true);
+            
+            // hiding previouly selected tab (slds-show/slds-hide)
+            $(elmnt).closest(".slds-tabs--scoped").children("div[role='tabpanel'].slds-show").addClass("slds-hide");
+            $(elmnt).closest(".slds-tabs--scoped").children("div[role='tabpanel'].slds-show").removeClass("slds-show");
+            // displaying newly selected tab (slds-show/slds-hide)
+            $(elmnt).closest(".slds-tabs--scoped").children("div[aria-labelledby='"+elmnt.id+"']").addClass("slds-show");
+            $(elmnt).closest(".slds-tabs--scoped").children("div[aria-labelledby='"+elmnt.id+"']").removeClass("slds-hide");
+        }
+        
+        function showSpinner(){
+            $('.slds-spinner_container').removeClass('slds-hide');
+            $('.slds-spinner_container').addClass('slds-show');    
+            
+            var winWidth = $(document).width();
+            var winHeight = $(document).height();
+            
+            $('.slds-spinner_container').css({ 'width': winWidth,'height': winHeight });                   
+        }
+        
+        function hideSpinner(){                 
+            $('.slds-spinner_container').removeClass('slds-show');
+            $('.slds-spinner_container').addClass('slds-hide');    
+        }   
+        
+        
+        function overridePageMessages(){    
+            var textureEffect = '';
+            //Uncomment below line for texture effect on page messages
+            //textureEffect = 'slds-theme--alert-texture';
+            
+            $('.warningM3').addClass('slds-notify slds-notify--toast slds-theme--warning customMessage '+textureEffect);          
+            $('.confirmM3').addClass('slds-notify slds-notify--alert slds-theme--success  customMessage '+textureEffect);    
+            $('.errorM3').addClass('slds-notify slds-notify--alert slds-theme--error customMessage '+textureEffect);                  
+            $('.infoM3').addClass('slds-notify slds-notify--toast customMessage '+textureEffect);    
+            
+            $('.errorM3').removeClass('errorM3'); 
+            $('.confirmM3').removeClass('confirmM3'); 
+            $('.infoM3').removeClass('infoM3');   
+            $('.warningM3').removeClass('warningM3');  
+        } 
+        </script>
+        
+        
+        <script>
+        //Assigning SLDS Static Resource Path To A Variable To Use It With ALJS Initialization
+        var assetsLoc = '{!URLFOR($Resource.SalesforceLighteningDesignSystem)}';
+        
+        //ALJS Initialization   
+        
+        $.aljsInit({
+            assetsLocation: assetsLoc, //SLDS Static Resource Path
+            scoped: true
+        });
+        
+        $(document).ready(function() {
+            
+            //Initializing Datepicker with options To The SLDS Input on document ready.
+            
+            $('.datefield').datepicker({
+                format: 'DD/MM/YYYY', //Date Format Of Datepicker Input Field
+                onChange: function(datepicker) {
+                    $('#SelectedDate').html('Selected Date: <strong>'+moment(datepicker.selectedFullDate._d).format('YYYY/MM/DD')+'</strong>');
+                }
+            });
+        });
+        
+        
+        </script>
+        <script> 
+        (function(){try{var a=navigator.userAgent; 
+                        if(/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream){ 
+                            var s=document.createElement('style'); 
+                            s.innerHTML="html,html body{overflow: auto;-webkit-overflow-scrolling:touch;}body{position:absolute;left:0;right:0;top:0;bottom:0;}"; 
+                            document.getElementsByTagName('head')[0].appendChild(s);}}catch(e){}})(); 
+        </script> 
+    </html>
+</apex:page>

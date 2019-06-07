@@ -1,0 +1,6 @@
+<apex:page >
+  <!-- Begin Default Content REMOVE THIS -->
+  <h1>Alert:</h1>
+  Units, Buildings and Centres are now updated every 15 minutes!
+  <!-- End Default Content REMOVE THIS -->
+</apex:page>
