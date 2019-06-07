@@ -17,6 +17,7 @@ global class ScheduleContact implements Database.Batchable<sObject>, Database.Al
         this.page = page;
         this.totalPages = totalPages;
         this.mapAccount = mapAccount;
+		// Comment Here
     }
 
     global ScheduleContact(Integer page) {
