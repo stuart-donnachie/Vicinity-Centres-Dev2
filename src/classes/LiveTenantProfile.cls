@@ -19,13 +19,23 @@ public with sharing class LiveTenantProfile {
 	}
 
 	public String getTenantProfile(String token){
+		String filter = 'tenant_key in [' + deal.Tenant_Key__c+ ']';
+
 
 		HttpRequest request = new HttpRequest();
 		request.setMethod('GET');
 		request.setHeader('Authorization', 'Bearer ' + token);
-		request.setEndpoint(Global_Settings__c.getInstance().API_URL_3__c+'/tenant-profile-daily-changes/'+deal.Tenant_Key__c+'/'+deal.Contract_Number__c+'/'+deal.Unit_Code__c+'/'+deal.Unit__r.Building__r.Building_Key__c);
-		//request.setEndpoint(Global_Settings__c.getInstance().API_URL_3__c+'/tenant_profiles/'+deal.Tenant_Key__c+'/'+deal.Contract_Number__c+'/'+deal.Unit_Code__c);
-		//request.setEndpoint(Global_Settings__c.getInstance().API_URL_3__c+'/tenant_profiles');
+		// Old call
+		//request.setEndpoint(Global_Settings__c.getInstance().API_URL_3__c+'/tenant-profile-daily-changes/'+deal.Tenant_Key__c+'/'+deal.Contract_Number__c+'/'+deal.Unit_Code__c+'/'+deal.Unit__r.Building__r.Building_Key__c);
+
+		// New Call
+		// We now call the GET /v3/temp-tenants/temp-tenant-profiles API method using a filter and passing in the Deal Tenant Key
+		//request.setEndpoint(Global_Settings__c.getInstance().API_URL_3__c+'/temp-tenant-profiles-daily-changes/'+deal.Tenant_Key__c+'/'+deal.Contract_Number__c+'/'+deal.Unit_Code__c+'/'+deal.Unit__r.Building__r.Building_Key__c);
+		request.setEndpoint(Global_Settings__c.getInstance().API_URL_4__c+'/temp-tenants/temp-tenant-profiles?filter='+filter);
+
+		System.debug('Tenant Profile Call - ' + Global_Settings__c.getInstance().API_URL_4__c+'/temp-tenants/temp-tenant-profiles?filter='+filter);
+
+
 		request.setTimeout(120000);
 
 		Http http = new Http();

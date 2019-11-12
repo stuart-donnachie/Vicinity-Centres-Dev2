@@ -60,7 +60,7 @@ global class ScheduleRatesV3 implements Database.Batchable<sObject>, Database.Al
         if (this.page < this.totalPages) {
             Database.executeBatch(new ScheduleRatesV3(this.token, this.page + 1, this.totalPages), 1000);
         } else  {
-            System.scheduleBatch(new ScheduleBusinessUnitV3(), 'Business Units Schedule V3', 0);
+            //System.scheduleBatch(new ScheduleBusinessUnitV3(), 'Business Units Schedule V3', 0);
         }
     }
 
@@ -143,6 +143,8 @@ global class ScheduleRatesV3 implements Database.Batchable<sObject>, Database.Al
 
                 if(mapjsonData.containsKey(c.Centre_Key__c)){
                     mapjsonData.get(c.Centre_Key__c).Id = c.Id;
+                    mapjsonData.get(c.Centre_Key__c).Lease_Admin__c = c.Lease_Admin__c;
+
                     centresToUpdate.add(mapjsonData.get(c.Centre_Key__c));
                 }
             }
@@ -150,7 +152,7 @@ global class ScheduleRatesV3 implements Database.Batchable<sObject>, Database.Al
 
             try{
                 update centresToUpdate;
-                ErrorLogHandler.log('Default Rates Schedule V3',String.valueOf(centresToUpdate.size()), String.valueOf(totalPages), String.valueOf(page), 'Schedule');
+                ErrorLogHandler.log('Rates Schedule V3',String.valueOf(centresToUpdate.size()), String.valueOf(totalPages), String.valueOf(page), 'Schedule');
                 //Database.update(centresToUpdate, false);
             }catch(exception e) {
                 ErrorLogHandler.log('Rates Schedule V3 exception #1 - Exception', e);
